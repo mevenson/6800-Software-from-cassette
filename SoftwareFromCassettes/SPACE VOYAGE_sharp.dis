@@ -1,0 +1,2131 @@
+              *
+              * PROGRAM SPACE VOYAGE.stx DISSASSEMBLED BY DA68Sharp
+              *
+              * using control table file SPACE VOYAGE.ctl
+              *
+'
+
+                         ORG      $00C0
+
+              
+              *  NAM STAR TREK
+              * ****************************
+              *  SPACE VOYAGE V3.2
+              *  BY UNKNOWN SOURCE
+              *  RECOVERED FROM OLD CASSETTES 
+              * 
+              * DISASSEMBLED BY Michael Evenson
+              * using labels and comments from TSC STAR TREK v1.2
+              * ****************************
+              * 
+              *  MONITOR ROUTINE ADDRESSES
+              * 
+              * OUTCH EQU $C003
+              * INCH EQU $C006
+              * CONTRL EQU $C000
+              * 
+              *  STORAGE AREAS
+              
+00C0          L00C0      FCB      $00
+00C1          MOVTBL     FCB      $00,$FF,$01,$FF,$01,$00,$01,$01
+00C9                     FCB      $00,$01,$FF,$01,$FF,$00,$FF,$FF
+              
+              *  CHARACTER PRINT TABLE
+              * 
+              
+00D1          CHRTBL     FCC      '.*KB'
+00D5     0620 JMPTBL     FDB      SETCRS                 
+00D7     039C            FDB      SRSCAN                 
+00D9     08D7            FDB      LRSCAN                 
+00DB     098E            FDB      PHASOR                 
+00DD     0601            FDB      PHOTOR                 
+00DF     0C14            FDB      DAMRPT                 
+00E1     037C            FDB      SHLDUP                 
+00E3     0370            FDB      SHLDWN                 
+00E5     0AAF            FDB      TELEPT                 
+00E7     0A87            FDB      SELFDE                 
+              *
+              * SUBROUTINE: PDATA1    
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+00E9  7E E07E PDATA1     JMP      _PDATA                 
+
+              *
+              * SUBROUTINE: OUTHR     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+00EC  7E E06B OUTHR      JMP      _OUTHR                 
+
+              *
+              * SUBROUTINE: OUTHL     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+00EF  7E E067 OUTHL      JMP      _OUTHL                 
+
+              *
+              * SUBROUTINE: OUTS      
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+00F2  7E E0CC OUTS       JMP      _OUTS                  
+
+              *
+              * SUBROUTINE: OUTEEE    
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+00F5  7E E1D1 OUTEEE     JMP      _OUTEEE                
+
+              *
+              * SUBROUTINE: INEEE     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+00F8  7E E1AC INEEE      JMP      _INEEE                 
+
+              
+              * this is some crap that was left over in memory when it was saved
+              
+00FB  7E A04A RANDOM     JMP      LA04A                  
+
+00FE  A7 61              STA A    $61,X                  
+              
+              *  PROGRAM ENTRY
+              * 
+              
+0100  8E A042 CONTRL     LDS      #LA042                 
+0103  CE 0C55            LDX      #TITLE                 
+0106  BD 04AE            JSR      PSTRNG                 send to console
+              
+              * CLEAR ALL TEMP STORAGE
+              
+0109  CE 0020            LDX      #STPSFL                
+010C  4F      SETCLR     CLR A                           
+010D  A7 00              STA A    $00,X                  
+010F  08                 INX                             
+0110  8C 00C1            CPX      #MOVTBL                
+0113  26 F7              BNE      SETCLR                 loop
+              *                                           
+0115  CE 0C68            LDX      #SHTLNG                ask if short or long game
+0118  BD 04AE            JSR      PSTRNG                 
+011B  BD 00F8            JSR      INEEE                  get response
+011E  81 53              CMP A    #$53                   (S)hort?
+0120  27 03              BEQ      SETQD                  yes - set up for short game
+              *                                           
+0122  7C 0055            INC      >LENGTH                increment type of game value
+              
+              * SETUP SPACE
+              
+0125  CE 0071 SETQD      LDX      #QUDMAP                
+0128  C6 40              LDA B    #$40                   
+012A  BD 00FB SETUP0     JSR      RANDOM                 
+012D  81 FC              CMP A    #$FC                   
+012F  23 04              BLS      SETUP1                  
+              *                                           
+0131  86 04              LDA A    #$04                   
+0133  20 19              BRA      SETUP5                 
+
+0135  81 F7   SETUP1     CMP A    #$F7                   
+0137  23 04              BLS      SETUP2                  
+              *                                           
+0139  86 03              LDA A    #$03                   
+013B  20 11              BRA      SETUP5                 
+
+013D  81 E0   SETUP2     CMP A    #$E0                   
+013F  23 04              BLS      SETUP3                  
+              *                                           
+0141  86 02              LDA A    #$02                   
+0143  20 09              BRA      SETUP5                 
+
+0145  81 A0   SETUP3     CMP A    #$A0                   
+0147  23 04              BLS      SETUP4                  
+              *                                           
+0149  86 01              LDA A    #$01                   
+014B  20 01              BRA      SETUP5                 
+
+014D  4F      SETUP4     CLR A                           
+014E  7F 0056 SETUP5     CLR      >ASAVE                 
+0151  7D 0055            TST      >LENGTH                
+0154  27 16              BEQ      SETUP8                  
+              *                                           
+0156  97 56              STA A    <ASAVE                 
+0158  BD 00FB            JSR      RANDOM                 
+015B  81 F0              CMP A    #$F0                   
+015D  23 04              BLS      SETUP6                  
+              *                                           
+015F  86 03              LDA A    #$03                   
+0161  20 09              BRA      SETUP8                 
+
+0163  81 C0   SETUP6     CMP A    #$C0                   
+0165  23 04              BLS      SETUP7                  
+              *                                           
+0167  86 02              LDA A    #$02                   
+0169  20 01              BRA      SETUP8                 
+
+016B  4F      SETUP7     CLR A                           
+016C  9B 56   SETUP8     ADD A    <ASAVE                 
+016E  A7 00              STA A    $00,X                  
+0170  9B 54              ADD A    <KLNGCT                
+0172  97 54              STA A    <KLNGCT                
+0174  BD 00FB            JSR      RANDOM                 
+0177  84 38              AND A    #$38                   
+0179  AA 00              ORA A    $00,X                  
+017B  A7 00              STA A    $00,X                  
+017D  08                 INX                             
+017E  5A                 DEC B                           
+017F  27 03              BEQ      CONT1                  
+0181  7E 012A            JMP      SETUP0                 
+
+              
+              * GET STARBASE LOCATION
+              
+0184  BD 00FB CONT1      JSR      RANDOM                 
+0187  84 07              AND A    #$07                   
+0189  16                 TAB                             
+018A  BD 00FB            JSR      RANDOM                 
+018D  84 07              AND A    #$07                   
+018F  97 21              STA A    <BASEX                 
+0191  D7 22              STA B    <BASEY                 
+0193  7C 0020            INC      >STPSFL                
+0196  CE 0071            LDX      #QUDMAP                
+0199  BD 04D4            JSR      STPSEX                 
+019C  86 40              LDA A    #$40                   
+019E  AA 00              ORA A    $00,X                  
+01A0  A7 00              STA A    $00,X                  
+01A2  8D 26              BSR      REFUEL                 
+01A4  BD 00FB            JSR      RANDOM                 
+01A7  8B 00              ADD A    #$00                   
+01A9  19                 DAA                             
+01AA  97 38              STA A    <TIME0_L               
+01AC  BD 00FB            JSR      RANDOM                 
+01AF  84 7F              AND A    #$7F                   
+01B1  8A 10              ORA A    #$10                   this is #$23 in STAR TREK
+01B3  8B 00              ADD A    #$00                   
+01B5  19                 DAA                             
+01B6  97 37              STA A    <TIME0_H               
+01B8  8D 2F              BSR      MAKTIM                 
+01BA  7D 0055            TST      >LENGTH                
+01BD  27 07              BEQ      GATM                   
+01BF  16                 TAB                             
+01C0  8D 27              BSR      MAKTIM                 
+01C2  80 03              SUB A    #$03                   
+01C4  1B                 ABA                             
+01C5  19                 DAA                             
+01C6  97 39   GATM       STA A    <GAMTIM                
+01C8  20 2A              BRA      CONT3                  
+
+              
+              * REFUEL THE ENTERPRISE
+              
+01CA  7F 0057 REFUEL     CLR      >SHIELD                
+01CD  86 30              LDA A    #$30                   
+01CF  97 58              STA A    <ENERGY_H              
+01D1  97 3C              STA A    <SHENGY_H              
+01D3  7F 0059            CLR      >ENERGY_L              
+01D6  7F 003D            CLR      >SHENGY_L              
+01D9  86 0F              LDA A    #$0F                   
+01DB  97 46              STA A    <PHOTON                
+01DD  CE 0061            LDX      #DAMENG                FIX ALL DAMAGE
+01E0  6F 00   REFUL1     CLR      $00,X                  
+01E2  08                 INX                             
+01E3  8C 0067            CPX      #DAMENG_9              
+01E6  26 F8              BNE      REFUL1                 
+01E8  39                 RTS                             
+
+              
+              * CALCULATE GAME TIME
+              
+01E9  BD 00FB MAKTIM     JSR      RANDOM                 
+01EC  84 0F              AND A    #$0F                   
+01EE  8A 22              ORA A    #$22                   #$31 in Star Trek 1.2 asm file
+01F0  8B 00              ADD A    #$00                   
+01F2  19                 DAA                             
+01F3  39                 RTS                             
+
+              
+              * CONTINUE SETUP
+              
+01F4  BD 00FB CONT3      JSR      RANDOM                 SET SHUTTLECRAFT LOCATION
+01F7  84 07              AND A    #$07                   
+01F9  97 47              STA A    <CURQUX                also - SHUTLX in Start Trek 1.2 asm file
+01FB  BD 00FB            JSR      RANDOM                 
+01FE  84 07              AND A    #$07                   
+0200  97 48              STA A    <CURQUY                also - SHUTLY in Star Trek 1.2 asm file
+0202  BD 04BE            JSR      SETUPS                 
+0205  CE 0C76            LDX      #BASINF                
+0208  BD 04AE            JSR      PSTRNG                 
+020B  96 21              LDA A    <BASEX                 
+020D  8D 4E              BSR      FIXOUT                 
+020F  BD 02AD            JSR      OUTDSH                 
+0212  96 22              LDA A    <BASEY                 
+0214  8D 47              BSR      FIXOUT                 
+0216  CE 0E53            LDX      #PASWRD                
+0219  BD 04AE            JSR      PSTRNG                 
+021C  CE 006D            LDX      #L006D                 
+021F  C6 03              LDA B    #$03                   
+0221  BD 00F8 CONT4      JSR      INEEE                  
+0224  A7 00              STA A    $00,X                  
+0226  08                 INX                             
+0227  5A                 DEC B                           
+0228  26 F7              BNE      CONT4                   
+              *                                           
+022A  CE 0C98            LDX      #INTRO1                
+022D  BD 04AE            JSR      PSTRNG                 
+0230  8D 30              BSR      OUTDAT                 
+0232  CE 0CA1            LDX      #INTRO2                
+0235  BD 04AE            JSR      PSTRNG                 
+0238  8D 39              BSR      OUTKLN                 
+023A  CE 0CAC            LDX      #INTRO3                
+023D  BD 04AE            JSR      PSTRNG                 
+0240  7F 0031            CLR      >TEMP_H                
+0243  96 39              LDA A    <GAMTIM                
+0245  97 32              STA A    <TEMP_L                
+0247  BD 0345            JSR      OUTBCD                 
+024A  CE 0CB4            LDX      #INTRO4                
+024D  BD 04AE            JSR      PSTRNG                 
+0250  8D 47              BSR      OUTQUD                 
+0252  CE 0CBF            LDX      #INTRO6                
+0255  BD 04AE            JSR      PSTRNG                 
+0258  8D 49              BSR      OUTSEC                 
+025A  7E 02BB            JMP      COMAND                 
+
+              
+              * OUTPUT A NUMBER
+              
+025D  8B 31   FIXOUT     ADD A    #$31                   
+025F  7E 00F5            JMP      OUTEEE                 
+
+              
+              * OUTPUT STARDATE
+              
+0262  DE 37   OUTDAT     LDX      <TIME0_H               
+0264  DF 31              STX      <TEMP_H                
+0266  BD 0345            JSR      OUTBCD                 
+0269  86 2E              LDA A    #$2E                   
+026B  BD 00F5            JSR      OUTEEE                 
+026E  96 28              LDA A    <TIMDEC                
+0270  7E 00EC            JMP      OUTHR                  
+
+              
+              * OUTPUT A KLINGON COUNT
+              
+0273  96 54   OUTKLN     LDA A    <KLNGCT                
+              *
+              * SUBROUTINE: OUTK0     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+0275  7F 0031 OUTK0      CLR      >TEMP_H                
+0278  7F 0032 OUTK1      CLR      >TEMP_L                
+027B  C6 0A              LDA B    #$0A                   
+027D  10      OUTK2      SBA                             
+027E  25 0C              BCS      OUTK3                  
+0280  7C 0032            INC      >TEMP_L                
+0283  D1 32              CMP B    <TEMP_L                
+0285  26 F6              BNE      OUTK2                  
+0287  7C 0031            INC      >TEMP_H                
+028A  20 EC              BRA      OUTK1                  
+
+028C  1B      OUTK3      ABA                             
+028D  D6 32              LDA B    <TEMP_L                
+028F  58                 ASL B                           
+0290  58                 ASL B                           
+0291  58                 ASL B                           
+0292  58                 ASL B                           
+0293  1B                 ABA                             
+0294  97 32              STA A    <TEMP_L                
+0296  7E 0345            JMP      OUTBCD                 
+
+              
+              * OUTPUT QUADRANT LOCATION
+              
+0299  96 47   OUTQUD     LDA A    <CURQUX                
+029B  8D C0              BSR      FIXOUT                 
+029D  8D 0E              BSR      OUTDSH                 
+029F  96 48              LDA A    <CURQUY                
+02A1  20 BA              BRA      FIXOUT                 
+
+              
+              * OUTPUT A SECTOR
+              * 
+              *     Star Trek 1.2 outputs CURSCY first, then CURSCX
+              
+02A3  96 49   OUTSEC     LDA A    <CURSCX                
+02A5  8D B6              BSR      FIXOUT                 
+02A7  8D 04              BSR      OUTDSH                 
+02A9  96 4A              LDA A    <CURSCY                
+02AB  20 B0              BRA      FIXOUT                 
+
+              
+              * OUTPUT A DASH
+              
+02AD  86 2D   OUTDSH     LDA A    #$2D                   
+02AF  7E 00F5            JMP      OUTEEE                 
+
+              
+              * ADD THE A-REG TO THE INDEX REGISTER
+              
+02B2  DF 31   FIXXRG     STX      <TEMP_H                
+02B4  9B 32              ADD A    <TEMP_L                
+02B6  97 32              STA A    <TEMP_L                
+02B8  DE 31              LDX      <TEMP_H                
+02BA  39                 RTS                             
+
+              
+              * GET COMMAND AND PERFORM IT
+              
+02BB  96 39   COMAND     LDA A    <GAMTIM                
+02BD  91 3B              CMP A    <TIMUSEL               
+02BF  22 03              BHI      NOEXTC                 
+02C1  7E 0B4C            JMP      NOMTIM                 
+
+02C4  7D 0054 NOEXTC     TST      >KLNGCT                
+02C7  26 03              BNE      NOEXT2                 
+02C9  7E 0B51            JMP      NOMKLN                 
+
+02CC  7D 0067 NOEXT2     TST      >DAMENG_9              SUPFLG in Star Trek 1.2 asm file
+02CF  27 09              BEQ      NOEXT4                 
+02D1  CE 0FA4            LDX      #SUPDES                
+02D4  BD 04AE            JSR      PSTRNG                 
+02D7  7E 0A9D            JMP      SELFDA                 JSR SELFDA and JMP ENDGAM in Star Trek 1.2 asm file
+
+02DA  BD 0B7A NOEXT4     JSR      CLRCQU                 CLEAR K & S
+02DD  86 02              LDA A    #$02                   
+02DF  91 4E              CMP A    <CNDFLG                DOCKED?
+02E1  27 48              BEQ      CMND27                  
+              *                                           
+02E3  7F 004E            CLR      >CNDFLG                
+02E6  7D 0026            TST      >SECKLN                RED?
+02E9  27 03              BEQ      CMNDAC                  
+              *                                           
+02EB  4A                 DEC A                           
+02EC  97 4E              STA A    <CNDFLG                
+02EE  BD 00FB CMNDAC     JSR      RANDOM                 
+02F1  81 FC              CMP A    #$FC                   SPACE STORM
+02F3  23 0D              BLS      COMND2                  
+              *                                           
+02F5  CE 0EF3            LDX      #SPSTRM                
+02F8  BD 04AE            JSR      PSTRNG                 
+02FB  86 02              LDA A    #$02                   
+02FD  97 66              STA A    <DAMSHL                
+02FF  7E 0370            JMP      SHLDWN                 JSR SHLDWN in Star Trek 1.2 asm file
+
+0302  BD 00FB COMND2     JSR      RANDOM                 
+0305  81 FC              CMP A    #$FC                   SUPERNOVA?
+0307  23 03              BLS      CMND25                  
+              *                                           
+0309  7E 0BB0            JMP      SUPNOV                 
+
+030C  BD 0AFA CMND25     JSR      ATTACK                 ALLOW ATTACK
+030F  7D 0058            TST      >ENERGY_H              
+0312  2A 03              BPL      COMND0                  
+              *                                           
+0314  7E 0B44            JMP      NRGOUT                 
+
+0317  86 03   COMND0     LDA A    #$03                   
+0319  91 58              CMP A    <ENERGY_H              
+031B  23 02              BLS      CMNDAD                  
+              *                                           
+031D  97 4E              STA A    <CNDFLG                
+031F  7D 003C CMNDAD     TST      >SHENGY_H              
+0322  2A 07              BPL      CMND27                 
+0324  4F                 CLR A                           
+0325  97 57              STA A    <SHIELD                
+0327  97 3C              STA A    <SHENGY_H              
+0329  97 3D              STA A    <SHENGY_L              
+032B  CE 0CC8 CMND27     LDX      #COMST                 PRINT COMMAND PROMPT
+032E  BD 04AE            JSR      PSTRNG                 
+0331  7F 0029            CLR      >STCFLG                
+0334  7F 0070            CLR      >PHTFLG                
+0337  BD 0863            JSR      INCHCK                 
+033A  48                 ASL A                           
+033B  CE 00D5            LDX      #JMPTBL                
+033E  BD 02B2            JSR      FIXXRG                 
+0341  EE 00              LDX      $00,X                  
+0343  6E 00              JMP      $00,X                  
+
+              *
+              * SUBROUTINE: OUTBCD    
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+0345  7F 004D OUTBCD     CLR      >FLAG                  
+0348  96 31              LDA A    <TEMP_H                
+034A  27 11              BEQ      OUTBC2                  
+              *                                           
+034C  84 F0              AND A    #$F0                   
+034E  27 05              BEQ      OUTBC1                  
+              *                                           
+0350  96 31              LDA A    <TEMP_H                
+0352  BD 00EF            JSR      OUTHL                  
+0355  96 31   OUTBC1     LDA A    <TEMP_H                
+0357  BD 00EC            JSR      OUTHR                  
+035A  7C 004D            INC      >FLAG                  
+035D  96 32   OUTBC2     LDA A    <TEMP_L                
+035F  7D 004D            TST      >FLAG                  
+0362  26 04              BNE      NOZERO                  
+              *                                           
+0364  84 F0              AND A    #$F0                   
+0366  27 03              BEQ      OUTBC3                  
+              *                                           
+0368  BD 00EF NOZERO     JSR      OUTHL                  
+036B  96 32   OUTBC3     LDA A    <TEMP_L                
+036D  7E 00EC            JMP      OUTHR                  
+
+              
+              * LOWER THE SHIELDS
+              
+0370  7F 0057 SHLDWN     CLR      >SHIELD                
+0373  CE 0CD3            LDX      #DWNST                 
+0376  BD 04AE SHLD0      JSR      PSTRNG                 
+0379  7E 02BB SHLD1      JMP      COMAND                 
+
+              
+              * RAISE THE SHIELDS
+              
+037C  96 3C   SHLDUP     LDA A    <SHENGY_H              
+037E  81 01              CMP A    #$01                   
+0380  23 F7              BLS      SHLD1                  
+0382  7D 0066            TST      >DAMSHL                
+0385  26 E9              BNE      SHLDWN                 
+0387  7C 0057            INC      >SHIELD                
+038A  CE 003C            LDX      #SHENGY_H              
+038D  86 02              LDA A    #$02                   
+038F  97 31              STA A    <TEMP_H                
+0391  7F 0032            CLR      >TEMP_L                
+0394  BD 08BB            JSR      BCDSUB                 
+0397  CE 0CE1            LDX      #UPSTR                 
+039A  20 DA              BRA      SHLD0                  
+
+              
+              * SHORT RANGE SCAN
+              
+039C  7D 0062 SRSCAN     TST      >DAMSRS                
+039F  27 03              BEQ      SSCAN1                 
+03A1  7E 0C0B            JMP      RPTDAM                 
+
+03A4  BD 04B3 SSCAN1     JSR      PCRLF                  
+03A7  7F 0050            CLR      >SCANY                 
+03AA  96 4E              LDA A    <CNDFLG                
+03AC  81 02              CMP A    #$02                   
+03AE  26 03              BNE      SSCAN2                  
+              *                                           
+03B0  BD 01CA            JSR      REFUEL                 
+03B3  CE 00B1 SSCAN2     LDX      #SECMAP                
+03B6  DF 33              STX      <TEMP2_H               
+03B8  BD 0457            JSR      DOSCAN                 
+03BB  CE 0D4C            LDX      #SDATE                 
+03BE  BD 00E9            JSR      PDATA1                 
+03C1  BD 0262            JSR      OUTDAT                 
+03C4  BD 0457            JSR      DOSCAN                 
+03C7  CE 0D57            LDX      #CNDTNS                
+03CA  BD 00E9            JSR      PDATA1                 
+03CD  96 4E              LDA A    <CNDFLG                
+03CF  27 1A              BEQ      SRSCN1                  
+              *                                           
+03D1  81 01              CMP A    #$01                   
+03D3  27 11              BEQ      SRSCN0                  
+              *                                           
+03D5  81 03              CMP A    #$03                   
+03D7  27 05              BEQ      OUTCN1                  
+              *                                           
+03D9  CE 0C81            LDX      #DOCKED                
+03DC  20 03              BRA      OUTCND                 
+
+03DE  CE 0D61 OUTCN1     LDX      #YELLOW                
+03E1  BD 00E9 OUTCND     JSR      PDATA1                 
+03E4  20 0A              BRA      SRSCN2                 
+
+03E6  CE 0D68 SRSCN0     LDX      #RED                   
+03E9  20 F6              BRA      OUTCND                 
+
+03EB  CE 0D6C SRSCN1     LDX      #GREEN                 
+03EE  20 F1              BRA      OUTCND                 
+
+03F0  8D 65   SRSCN2     BSR      DOSCAN                 
+03F2  CE 0D72            LDX      #QUADP                 
+03F5  BD 00E9            JSR      PDATA1                 
+03F8  BD 0299            JSR      OUTQUD                 
+03FB  8D 5A              BSR      DOSCAN                 
+03FD  CE 0D7D            LDX      #SECP                  
+0400  BD 00E9            JSR      PDATA1                 
+0403  BD 02A3            JSR      OUTSEC                 
+0406  8D 4F              BSR      DOSCAN                 
+0408  CE 0D88            LDX      #ENGSTR                
+040B  BD 00E9            JSR      PDATA1                 
+040E  DE 58              LDX      <ENERGY_H              
+0410  DF 31              STX      <TEMP_H                
+0412  BD 0345            JSR      OUTBCD                 
+0415  8D 40              BSR      DOSCAN                 
+0417  CE 0D93            LDX      #KLSTR                 
+041A  BD 00E9            JSR      PDATA1                 
+041D  BD 0273            JSR      OUTKLN                 
+0420  8D 35              BSR      DOSCAN                 
+0422  CE 0DA0            LDX      #SHSTR                 
+0425  BD 00E9            JSR      PDATA1                 
+0428  DE 3C              LDX      <SHENGY_H              
+042A  DF 31              STX      <TEMP_H                
+042C  BD 0345            JSR      OUTBCD                 
+042F  7D 0057            TST      >SHIELD                
+0432  27 05              BEQ      SRSCN4                 
+0434  CE 0C72            LDX      #UPSCAS                
+0437  20 03              BRA      SRSCN5                 
+
+0439  CE 0C88 SRSCN4     LDX      #DNSCAS                
+043C  BD 00E9 SRSCN5     JSR      PDATA1                 
+043F  8D 16              BSR      DOSCAN                 
+0441  CE 0DAA            LDX      #TRPSTR                
+0444  BD 00E9            JSR      PDATA1                 
+0447  7F 0031            CLR      >TEMP_H                
+044A  96 46              LDA A    <PHOTON                
+044C  8B 00              ADD A    #$00                   
+044E  19                 DAA                             
+044F  97 32              STA A    <TEMP_L                
+0451  BD 0345            JSR      OUTBCD                 
+0454  7E 02BB            JMP      COMAND                 
+
+              
+              * OUTPUT 1 SHORT RANGE SCAN LINE
+              
+0457  BD 04B3 DOSCAN     JSR      PCRLF                  
+045A  86 02              LDA A    #$02                   
+045C  97 30              STA A    <COUNT                 
+045E  7F 004F            CLR      >SCANX                 
+0461  86 04   DOSCN      LDA A    #$04                   
+0463  97 51              STA A    <COUNT1                
+0465  DE 33              LDX      <TEMP2_H               
+0467  A6 00              LDA A    $00,X                  
+0469  97 56   DOSCN0     STA A    <ASAVE                 
+046B  96 4A              LDA A    <CURSCY                
+046D  91 50              CMP A    <SCANY                 
+046F  26 0D              BNE      CHK0                   
+0471  96 49              LDA A    <CURSCX                
+0473  91 4F              CMP A    <SCANX                 
+0475  26 07              BNE      CHK0                   
+0477  86 45              LDA A    #$45                   
+0479  BD 00F5            JSR      OUTEEE                 
+047C  20 0F              BRA      GOAHD                  
+
+047E  96 56   CHK0       LDA A    <ASAVE                 
+0480  CE 00D1 DOSCN1     LDX      #CHRTBL                
+0483  84 03              AND A    #$03                   
+0485  BD 02B2            JSR      FIXXRG                 
+0488  A6 00              LDA A    $00,X                  
+048A  BD 00F5            JSR      OUTEEE                 
+048D  BD 00F2 GOAHD      JSR      OUTS                   
+0490  DE 33              LDX      <TEMP2_H               
+0492  7C 004F            INC      >SCANX                 
+0495  7A 0051            DEC      >COUNT1                
+0498  27 06              BEQ      DOSCN2                 
+049A  96 56              LDA A    <ASAVE                 
+049C  44                 LSR A                           
+049D  44                 LSR A                           
+049E  20 C9              BRA      DOSCN0                 
+
+04A0  08      DOSCN2     INX                             
+04A1  DF 33              STX      <TEMP2_H               
+04A3  A6 00              LDA A    $00,X                  
+04A5  7A 0030            DEC      >COUNT                 
+04A8  26 B7              BNE      DOSCN                  
+04AA  7C 0050            INC      >SCANY                 
+04AD  39                 RTS                             
+
+              *
+              * SUBROUTINE: PSTRNG    
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+04AE  8D 03   PSTRNG     BSR      PCRLF                  
+04B0  7E 00E9            JMP      PDATA1                 
+
+              *
+              * SUBROUTINE: PCRLF     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+04B3  DF 35   PCRLF      STX      <TEMP2_L               
+04B5  CE 0DB6            LDX      #CRLF                  
+04B8  BD 00E9            JSR      PDATA1                 
+04BB  DE 35              LDX      <TEMP2_L               
+04BD  39                 RTS                             
+
+              *
+              * SUBROUTINE: SETUPS    
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+04BE  7F 0026 SETUPS     CLR      >SECKLN                
+04C1  CE 00B1            LDX      #SECMAP                
+04C4  C6 10              LDA B    #$10                   
+04C6  4F                 CLR A                           
+04C7  A7 00   SETPS1     STA A    $00,X                  
+04C9  08                 INX                             
+04CA  5A                 DEC B                           
+04CB  26 FA              BNE      SETPS1                  
+              *                                           
+04CD  CE 0071            LDX      #QUDMAP                
+04D0  96 47              LDA A    <CURQUX                
+04D2  D6 48              LDA B    <CURQUY                
+              *
+              * SUBROUTINE: STPSEX    
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+04D4  97 56   STPSEX     STA A    <ASAVE                 
+04D6  5D                 TST B                           
+04D7  27 09              BEQ      SETPS4                  
+              *                                           
+04D9  86 08   SETPS2     LDA A    #$08                   
+04DB  08      SETPS3     INX                             
+04DC  4A                 DEC A                           
+04DD  26 FC              BNE      SETPS3                  
+              *                                           
+04DF  5A                 DEC B                           
+04E0  26 F7              BNE      SETPS2                 
+04E2  96 56   SETPS4     LDA A    <ASAVE                 
+04E4  27 04              BEQ      SETPS6                  
+              *                                           
+04E6  08      SETPS5     INX                             
+04E7  4A                 DEC A                           
+04E8  26 FC              BNE      SETPS5                  
+              *                                           
+04EA  7D 0020 SETPS6     TST      >STPSFL                
+04ED  27 04              BEQ      STPSNX                 
+04EF  7F 0020            CLR      >STPSFL                
+04F2  39                 RTS                             
+
+04F3  DF 6B   STPSNX     STX      <QUDPTR                
+04F5  E6 00              LDA B    $00,X                  
+04F7  D7 52              STA B    <SECINF                
+04F9  27 36              BEQ      SETP10                  
+              *                                           
+04FB  C4 07              AND B    #$07                   
+04FD  27 0A              BEQ      SETPS7                  
+              *                                           
+04FF  D7 30              STA B    <COUNT                 
+0501  D7 26              STA B    <SECKLN                
+0503  86 02              LDA A    #$02                   
+0505  97 53              STA A    <MASK                  
+0507  8D 62              BSR      PUTINM                  
+              *                                           
+0509  D6 52   SETPS7     LDA B    <SECINF                
+050B  C4 38              AND B    #$38                   
+050D  27 0B              BEQ      SETPS8                  
+              *                                           
+050F  54                 LSR B                           
+0510  54                 LSR B                           
+0511  54                 LSR B                           
+0512  D7 30              STA B    <COUNT                 
+0514  86 01              LDA A    #$01                   
+0516  97 53              STA A    <MASK                  
+0518  8D 51              BSR      PUTINM                  
+              *                                           
+051A  D6 52   SETPS8     LDA B    <SECINF                
+051C  C5 40              BIT B    #$40                   
+051E  27 0A              BEQ      SETPS9                  
+              *                                           
+0520  86 01              LDA A    #$01                   
+0522  97 30              STA A    <COUNT                 
+0524  86 03              LDA A    #$03                   
+0526  97 53              STA A    <MASK                  
+0528  8D 41              BSR      PUTINM                 
+052A  D6 52   SETPS9     LDA B    <SECINF                
+052C  2A 03              BPL      SETP10                 
+052E  7C 0067            INC      >DAMENG_9              
+0531  BD 00FB SETP10     JSR      RANDOM                 
+0534  84 07              AND A    #$07                   
+0536  97 4B              STA A    <TRIALX                
+0538  BD 00FB            JSR      RANDOM                 
+053B  84 07              AND A    #$07                   
+053D  97 4C              STA A    <TRIALY                
+053F  BD 05B3            JSR      CHKPOS                 
+0542  7D 004D            TST      >FLAG                  
+0545  26 EA              BNE      SETP10                 
+0547  96 4B              LDA A    <TRIALX                
+0549  97 49              STA A    <CURSCX                
+054B  96 4C              LDA A    <TRIALY                
+054D  97 4A              STA A    <CURSCY                
+              
+              * COMPUTE LOCAL KLINGON ENERGY
+              
+054F  D6 26              LDA B    <SECKLN                
+0551  58                 ASL B                           
+0552  CE 003E            LDX      #KLNENG_H              
+              *
+              * SUBROUTINE: CSCEXT    
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+0555  6F 00   CSCEXT     CLR      $00,X                  
+0557  6F 01              CLR      $01,X                  
+0559  BD 00FB CSCKN1     JSR      RANDOM                 
+055C  8B 00              ADD A    #$00                   
+055E  19                 DAA                             
+055F  7F 0031            CLR      >TEMP_H                
+0562  97 32              STA A    <TEMP_L                
+0564  BD 08B8            JSR      BCDADD                 
+0567  5A                 DEC B                           
+0568  26 EF              BNE      CSCKN1                 
+056A  39                 RTS                             
+
+              
+              * PUT OBJECTS IN SECTOR MAP
+              
+056B  CE 00B1 PUTINM     LDX      #SECMAP                
+056E  BD 00FB            JSR      RANDOM                 
+0571  84 0F              AND A    #$0F                   
+0573  97 5A              STA A    <TSAVE1                
+0575  BD 02B2            JSR      FIXXRG                 
+0578  E6 00              LDA B    $00,X                  
+057A  BD 00FB            JSR      RANDOM                 
+057D  84 03              AND A    #$03                   
+057F  97 56              STA A    <ASAVE                 
+0581  27 05              BEQ      PUTIN2                  
+              *                                           
+0583  56      PUTIN1     ROR B                           
+0584  56                 ROR B                           
+0585  4A                 DEC A                           
+0586  26 FB              BNE      PUTIN1                  
+              *                                           
+0588  C5 03   PUTIN2     BIT B    #$03                   
+058A  26 DF              BNE      PUTINM                 
+058C  DA 53              ORA B    <MASK                  
+058E  96 56              LDA A    <ASAVE                 
+0590  27 05              BEQ      PUTIN4                  
+              *                                           
+0592  59      PUTIN3     ROL B                           
+0593  59                 ROL B                           
+0594  4A                 DEC A                           
+0595  26 FB              BNE      PUTIN3                  
+              *                                           
+0597  E7 00   PUTIN4     STA B    $00,X                  
+0599  7A 0030            DEC      >COUNT                 
+059C  26 CD              BNE      PUTINM                 
+059E  96 53              LDA A    <MASK                  
+05A0  81 03              CMP A    #$03                   
+05A2  26 0E              BNE      PUTIN6                  
+              *                                           
+05A4  D6 5A              LDA B    <TSAVE1                
+05A6  0C                 CLC                             
+05A7  56                 ROR B                           
+05A8  96 56              LDA A    <ASAVE                 
+05AA  24 02              BCC      PUTIN5                  
+              *                                           
+05AC  8B 04              ADD A    #$04                   
+05AE  97 23   PUTIN5     STA A    <BASESX                
+05B0  D7 24              STA B    <BASESY                
+05B2  39      PUTIN6     RTS                             
+
+              
+              * CHECK FOR EMPTY POSITIONS
+              
+05B3  7F 004D CHKPOS     CLR      >FLAG                  
+05B6  DF 35              STX      <TEMP2_L               
+05B8  CE 00B1            LDX      #SECMAP                
+05BB  96 4C              LDA A    <TRIALY                
+05BD  27 05              BEQ      CHKPO2                  
+              *                                           
+05BF  08      CHKPO1     INX                             
+05C0  08                 INX                             
+05C1  4A                 DEC A                           
+05C2  26 FB              BNE      CHKPO1                  
+              *                                           
+05C4  96 4B   CHKPO2     LDA A    <TRIALX                
+05C6  81 03              CMP A    #$03                   
+05C8  23 03              BLS      CHKPO3                  
+              *                                           
+05CA  08                 INX                             
+05CB  80 04              SUB A    #$04                   
+05CD  E6 00   CHKPO3     LDA B    $00,X                  
+05CF  97 56              STA A    <ASAVE                 
+05D1  27 05              BEQ      CHKPO5                  
+              *                                           
+05D3  54      CHKPO4     LSR B                           
+05D4  54                 LSR B                           
+05D5  4A                 DEC A                           
+05D6  26 FB              BNE      CHKPO4                  
+              *                                           
+05D8  C4 03   CHKPO5     AND B    #$03                   
+05DA  27 10              BEQ      CHKPO6                  
+              *                                           
+05DC  D7 4D              STA B    <FLAG                  
+05DE  7D 0029            TST      >STCFLG                
+05E1  27 09              BEQ      CHKPO6                  
+              *                                           
+05E3  7D 0070            TST      >PHTFLG                
+05E6  26 07              BNE      CHKPO7                  
+              *                                           
+05E8  C1 02              CMP B    #$02                   
+05EA  27 03              BEQ      CHKPO7                 
+05EC  DE 35   CHKPO6     LDX      <TEMP2_L               
+05EE  39                 RTS                             
+
+05EF  C6 FC   CHKPO7     LDA B    #$FC                   
+05F1  96 56              LDA A    <ASAVE                 
+05F3  27 06              BEQ      CHKPO9                  
+              *                                           
+05F5  0D                 SEC                             
+05F6  59      CHKPO8     ROL B                           
+05F7  59                 ROL B                           
+05F8  4A                 DEC A                           
+05F9  26 FB              BNE      CHKPO8                  
+              *                                           
+05FB  E4 00   CHKPO9     AND B    $00,X                  
+05FD  E7 00              STA B    $00,X                  
+05FF  20 EB              BRA      CHKPO6                 
+
+              
+              * FIRE PHOTON TORPEDO
+              
+0601  7D 0065 PHOTOR     TST      >DAMPHT                
+0604  27 03              BEQ      PTRNDM                  
+              *                                           
+0606  7E 0C0B PTRND9     JMP      RPTDAM                 
+
+0609  7D 0046 PTRNDM     TST      >PHOTON                ANY LEFT
+060C  26 03              BNE      PHOTRO                  
+              *                                           
+060E  7E 085A            JMP      PTEMPT                 TUBES EMPTY
+
+0611  7C 0070 PHOTRO     INC      >PHTFLG                
+0614  BD 00FB            JSR      RANDOM                 
+0617  84 0F              AND A    #$0F                   
+0619  8A 04              ORA A    #$04                   
+061B  97 2D              STA A    <WARP                  
+061D  7A 0046            DEC      >PHOTON                
+              
+              * WARP ENGINES AND PHOTON TORP COURSE
+              
+0620  7F 002A SETCRS     CLR      >SQFLG                 
+0623  7F 0025            CLR      >GLMFLG                
+0626  CE 0CEC            LDX      #CRSSTR                
+0629  BD 04AE            JSR      PSTRNG                 
+062C  BD 0863            JSR      INCHCK                 
+062F  81 07              CMP A    #$07                   
+0631  22 34              BHI      ABC29                   
+              *                                           
+0633  97 2C              STA A    <COURSE                
+0635  7D 0070            TST      >PHTFLG                
+0638  26 22              BNE      PHTOR1                  
+              *                                           
+063A  CE 0CF5            LDX      #WRPSTR                
+063D  BD 04AE            JSR      PSTRNG                 
+0640  BD 0863            JSR      INCHCK                 
+0643  97 2D              STA A    <WARP                  
+0645  7D 002B            TST      >PNTFLG                
+0648  26 09              BNE      STCRS2                  
+              *                                           
+064A  97 2A              STA A    <SQFLG                 
+064C  7D 0061            TST      >DAMENG                
+064F  26 B5              BNE      PTRND9                  
+              *                                           
+0651  20 00              BRA      STCRS2                 
+
+0653  BD 00F8 STCRS2     JSR      INEEE                  
+0656  81 0D              CMP A    #$0D                   
+0658  26 F9              BNE      STCRS2                 
+065A  96 2C              LDA A    <COURSE                
+065C  CE 00C1 PHTOR1     LDX      #MOVTBL                
+065F  48                 ASL A                           
+0660  BD 02B2            JSR      FIXXRG                 
+0663  96 2D              LDA A    <WARP                  
+0665  26 03              BNE      ABC30                   
+              *                                           
+0667  7E 02BB ABC29      JMP      COMAND                 
+
+066A  97 30   ABC30      STA A    <COUNT                 
+066C  7D 002A            TST      >SQFLG                 
+066F  27 04              BEQ      STCRS3                  
+              *                                           
+0671  86 0F              LDA A    #$0F                   
+0673  97 30              STA A    <COUNT                 
+0675  96 49   STCRS3     LDA A    <CURSCX                
+0677  D6 4A              LDA B    <CURSCY                
+0679  AB 00   PHTOR2     ADD A    $00,X                  
+067B  EB 01              ADD B    $01,X                  
+067D  BD 0836            JSR      TSTBND                 
+0680  7D 002E            TST      >FINCX                 
+0683  27 03              BEQ      ABC1                    
+              *                                           
+0685  7E 070D            JMP      STCRS5                 
+
+0688  7D 002F ABC1       TST      >FINCY                 
+068B  27 03              BEQ      ABC5                    
+              *                                           
+068D  7E 070D            JMP      STCRS5                 
+
+0690  97 4B   ABC5       STA A    <TRIALX                SAVE TRIAL POSITION
+0692  D7 4C              STA B    <TRIALY                
+0694  7D 0070            TST      >PHTFLG                
+0697  27 05              BEQ      ABC4                    
+              *                                           
+0699  BD 04B3            JSR      PCRLF                  
+069C  8D 1F              BSR      OBATSO                  
+              *                                           
+069E  7C 0029 ABC4       INC      >STCFLG                
+06A1  BD 05B3            JSR      CHKPOS                 CHK IF BLKD
+06A4  96 4D              LDA A    <FLAG                  
+06A6  27 2B              BEQ      STCRS4                  
+              *                                           
+06A8  7D 0070            TST      >PHTFLG                
+06AB  27 03              BEQ      ABC2                    
+              *                                           
+06AD  7E 07EF            JMP      PHTOR3                 
+
+06B0  81 02   ABC2       CMP A    #$02                   
+06B2  26 03              BNE      ABC3                    
+              *                                           
+06B4  7E 0799            JMP      KLGRAM                 
+
+06B7  CE 0D03 ABC3       LDX      #BLOKST                
+06BA  BD 04AE            JSR      PSTRNG                 
+              *
+              * SUBROUTINE: OBATSO    
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+06BD  96 4B   OBATSO     LDA A    <TRIALX                Star Trek 1.2 does TRIALY before TRIALX
+06BF  BD 025D            JSR      FIXOUT                 
+06C2  BD 02AD            JSR      OUTDSH                 
+06C5  96 4C              LDA A    <TRIALY                
+06C7  BD 025D            JSR      FIXOUT                 
+06CA  7D 0070            TST      >PHTFLG                
+06CD  27 01              BEQ      STCRET                  
+              *                                           
+06CF  39                 RTS                             
+
+06D0  7E 075A STCRET     JMP      STCRS6                 
+
+06D3  7D 0070 STCRS4     TST      >PHTFLG                
+06D6  27 0C              BEQ      STCRSB                 JUMP IF NOT
+06D8  96 4B              LDA A    <TRIALX                
+06DA  D6 4C              LDA B    <TRIALY                
+06DC  7A 0030            DEC      >COUNT                 
+06DF  26 98              BNE      PHTOR2                 
+06E1  7E 082D            JMP      PHTOR4                 out of energy
+
+06E4  96 4B   STCRSB     LDA A    <TRIALX                
+06E6  97 49              STA A    <CURSCX                
+06E8  96 4C              LDA A    <TRIALY                
+06EA  97 4A              STA A    <CURSCY                
+06EC  BD 00FB            JSR      RANDOM                 
+06EF  81 80              CMP A    #$80                   
+06F1  23 0A              BLS      STCRSC                  
+              *                                           
+06F3  86 01              LDA A    #$01                   
+06F5  BD 0880            JSR      FIXTIM                 
+06F8  86 03              LDA A    #$03                   
+06FA  BD 08A8            JSR      FIXENG                 
+06FD  7A 0030 STCRSC     DEC      >COUNT                 
+0700  27 03              BEQ      STCRSD                  
+              *                                           
+0702  7E 0675            JMP      STCRS3                 
+
+0705  7D 002A STCRSD     TST      >SQFLG                 
+0708  26 03              BNE      STCRS5                 
+070A  7E 075A            JMP      STCRS6                 
+
+070D  7D 0070 STCRS5     TST      >PHTFLG                
+0710  27 03              BEQ      ABC6                    
+              *                                           
+0712  7E 082D            JMP      PHTOR4                 
+
+0715  96 2D   ABC6       LDA A    <WARP                  
+0717  97 30              STA A    <COUNT                 
+0719  96 47   ABC7       LDA A    <CURQUX                
+071B  D6 48              LDA B    <CURQUY                
+071D  7D 002A            TST      >SQFLG                 
+0720  27 60              BEQ      STCRS7                  
+              *                                           
+0722  AB 00              ADD A    $00,X                  
+0724  EB 01              ADD B    $01,X                  
+0726  97 4B              STA A    <TRIALX                
+0728  D7 4C              STA B    <TRIALY                
+072A  BD 0836            JSR      TSTBND                 
+072D  7D 002E            TST      >FINCX                 
+0730  27 03              BEQ      ABCD0                   
+              *                                           
+0732  7E 07CC            JMP      GALBND                 
+
+0735  7D 002F ABCD0      TST      >FINCY                 
+0738  27 03              BEQ      ABCD1                   
+              *                                           
+073A  7E 07CC            JMP      GALBND                 
+
+073D  96 4B   ABCD1      LDA A    <TRIALX                
+073F  97 47              STA A    <CURQUX                
+0741  96 4C              LDA A    <TRIALY                
+0743  97 48              STA A    <CURQUY                
+0745  7C 0025            INC      >GLMFLG                
+0748  86 06              LDA A    #$06                   
+074A  BD 0880            JSR      FIXTIM                 
+074D  86 30              LDA A    #$30                   
+074F  BD 08A8            JSR      FIXENG                 
+0752  7A 0030            DEC      >COUNT                 
+0755  26 C2              BNE      ABC7                    
+              *                                           
+0757  BD 04BE STCRSA     JSR      SETUPS                 
+075A  7F 004E STCRS6     CLR      >CNDFLG                
+075D  96 21              LDA A    <BASEX                 
+075F  91 47              CMP A    <CURQUX                
+0761  26 1C              BNE      SEXIT1                  
+              *                                           
+0763  D6 22              LDA B    <BASEY                 
+0765  D1 48              CMP B    <CURQUY                
+0767  26 16              BNE      SEXIT1                  
+              *                                           
+0769  96 23              LDA A    <BASESX                
+076B  D6 24              LDA B    <BASESY                
+076D  4C                 INC A                           
+076E  90 49              SUB A    <CURSCX                
+0770  81 02              CMP A    #$02                   
+0772  22 0B              BHI      SEXIT1                 
+0774  5C                 INC B                           
+0775  D0 4A              SUB B    <CURSCY                
+0777  C1 02              CMP B    #$02                   
+0779  22 04              BHI      SEXIT1                 
+077B  86 02              LDA A    #$02                   
+077D  97 4E              STA A    <CNDFLG                
+077F  7E 02BB SEXIT1     JMP      COMAND                 
+
+0782  9B 2E   STCRS7     ADD A    <FINCX                 
+0784  DB 2F              ADD B    <FINCY                 
+0786  81 07              CMP A    #$07                   
+0788  22 42              BHI      GALBND                 
+078A  C1 07              CMP B    #$07                   
+078C  22 3E              BHI      GALBND                 
+078E  97 47              STA A    <CURQUX                
+0790  D7 48              STA B    <CURQUY                
+0792  86 07              LDA A    #$07                   
+0794  BD 0880            JSR      FIXTIM                 
+0797  20 BE              BRA      STCRSA                 
+
+              
+              * RAMMED A KLINGON ROUTINE
+              
+0799  CE 0D10 KLGRAM     LDX      #KRMSTR                
+079C  BD 04AE            JSR      PSTRNG                 
+079F  86 01              LDA A    #$01                   
+07A1  97 30              STA A    <COUNT                 
+07A3  7F 002A            CLR      >SQFLG                 
+07A6  7C 005B            INC      >HITKLS                
+07A9  7A 0054            DEC      >KLNGCT                
+07AC  7A 0026            DEC      >SECKLN                
+07AF  7C 0070            INC      >PHTFLG                
+07B2  BD 06BD            JSR      OBATSO                 
+07B5  CE 0FC0            LDX      #HEVDAM                
+07B8  BD 04AE            JSR      PSTRNG                 
+07BB  C6 6A              LDA B    #$6A                   
+07BD  BD 0BE9            JSR      MANDAM                 
+07C0  CE 0E60            LDX      #STILFT                
+07C3  BD 04AE            JSR      PSTRNG                 
+07C6  BD 0273            JSR      OUTKLN                 
+07C9  7E 06E4            JMP      STCRSB                 
+
+              
+              * PRINT GALAXY LIMIT MESSAGE
+              
+07CC  CE 0D24 GALBND     LDX      #GLBNDS                
+07CF  BD 04AE            JSR      PSTRNG                 
+07D2  96 60              LDA A    <GALCNT                
+07D4  4C                 INC A                           
+07D5  81 03              CMP A    #$03                   
+07D7  26 09              BNE      GALBN2                  
+              *                                           
+07D9  CE 0F13            LDX      #GALDUM                
+07DC  BD 04AE            JSR      PSTRNG                 
+07DF  7E 0B59            JMP      ENDGAM                 
+
+07E2  97 60   GALBN2     STA A    <GALCNT                
+07E4  7D 0025            TST      >GLMFLG                
+07E7  26 03              BNE      ABC20                   
+              *                                           
+07E9  7E 075A            JMP      STCRS6                 
+
+07EC  7E 0757 ABC20      JMP      STCRSA                 
+
+              
+              * TORPEDO HAS HIT SOMETHING
+              
+07EF  CE 0D31 PHTOR3     LDX      #PHITST                
+07F2  BD 04AE            JSR      PSTRNG                 
+07F5  96 4D              LDA A    <FLAG                  
+07F7  81 02              CMP A    #$02                   
+07F9  26 1A              BNE      ABC8                    
+              *                                           
+07FB  7A 0026            DEC      >SECKLN                
+07FE  7A 0054            DEC      >KLNGCT                
+0801  7C 005B            INC      >HITKLS                
+0804  CE 0E4B            LDX      #KLGSTR                
+0807  BD 00E9            JSR      PDATA1                 
+080A  CE 0E60            LDX      #STILFT                
+080D  BD 04AE            JSR      PSTRNG                 
+0810  BD 0273            JSR      OUTKLN                 
+0813  20 0D              BRA      ABC10                  
+
+0815  81 01   ABC8       CMP A    #$01                   
+0817  26 0C              BNE      ABC11                   
+              *                                           
+0819  7C 005C            INC      >HITSTR                
+081C  CE 0E41            LDX      #STARST                
+081F  BD 00E9 ABC9       JSR      PDATA1                 
+0822  7E 02BB ABC10      JMP      COMAND                 
+
+0825  CE 0E46 ABC11      LDX      #BASEST                HIT BASE!
+0828  7C 005D            INC      >HITBAS                
+082B  20 F2              BRA      ABC9                   
+
+082D  CE 0D3E PHTOR4     LDX      #PNOENG                
+0830  BD 04AE            JSR      PSTRNG                 
+0833  7E 075A            JMP      STCRS6                 
+
+              
+              * SEE IF GALAXY EDGE REACHED
+              
+0836  7F 002E TSTBND     CLR      >FINCX                 
+0839  7F 002F            CLR      >FINCY                 
+083C  4D                 TST A                           
+083D  2A 05              BPL      TSTBN1                  
+              *                                           
+083F  7A 002E            DEC      >FINCX                 
+0842  20 07              BRA      TSTBN2                 
+
+0844  81 07   TSTBN1     CMP A    #$07                   
+0846  23 03              BLS      TSTBN2                 
+0848  7C 002E            INC      >FINCX                 
+084B  5D      TSTBN2     TST B                           
+084C  2A 04              BPL      TSTBN3                  
+              *                                           
+084E  7A 002F            DEC      >FINCY                 
+0851  39                 RTS                             
+
+0852  C1 07   TSTBN3     CMP B    #$07                   
+0854  23 03              BLS      TSTBN4                 
+0856  7C 002F            INC      >FINCY                 
+0859  39      TSTBN4     RTS                             
+
+085A  CE 0C8C PTEMPT     LDX      #TUBEMT                
+085D  BD 04AE            JSR      PSTRNG                 
+0860  7E 02BB            JMP      COMAND                 
+
+              
+              * INPUT CHARACTER AND CHECK
+              
+0863  4F      INCHCK     CLR A                           
+0864  97 2B   INCHK0     STA A    <PNTFLG                
+0866  BD 00F8            JSR      INEEE                  
+0869  81 2E              CMP A    #$2E                   
+086B  27 F7              BEQ      INCHK0                 
+086D  81 39              CMP A    #$39                   
+086F  22 07              BHI      INCHK1                 
+0871  81 2F              CMP A    #$2F                   
+0873  23 03              BLS      INCHK1                 
+0875  80 30              SUB A    #$30                   
+0877  39                 RTS                             
+
+0878  CE 0E3D INCHK1     LDX      #ERR                   
+087B  BD 00E9            JSR      PDATA1                 
+087E  20 E3              BRA      INCHCK                 
+
+              
+              * ADD TO GAME TIME
+              
+0880  9B 28   FIXTIM     ADD A    <TIMDEC                
+0882  81 09              CMP A    #$09                   
+0884  23 1F              BLS      L08A5                  
+0886  80 0A              SUB A    #$0A                   
+0888  97 28              STA A    <TIMDEC                
+088A  7F 0031            CLR      >TEMP_H                
+088D  86 01              LDA A    #$01                   
+088F  97 32              STA A    <TEMP_L                
+0891  DF 35              STX      <TEMP2_L               
+0893  CE 0037            LDX      #TIME0_H               
+0896  BD 08B8            JSR      BCDADD                 
+0899  CE 003A            LDX      #TIMUSEH               
+089C  BD 08B8            JSR      BCDADD                 
+089F  BD 0BA0            JSR      FIXDAM                 
+08A2  DE 35              LDX      <TEMP2_L               
+08A4  39                 RTS                             
+
+08A5  97 28   L08A5      STA A    <TIMDEC                
+08A7  39                 RTS                             
+
+              
+              * SUBTRACT FROM ENERGY AMOUNT
+              
+08A8  DF 35   FIXENG     STX      <TEMP2_L               
+08AA  CE 0058            LDX      #ENERGY_H              
+08AD  7F 0031            CLR      >TEMP_H                
+08B0  97 32              STA A    <TEMP_L                
+08B2  BD 08BB            JSR      BCDSUB                 
+08B5  DE 35              LDX      <TEMP2_L               
+08B7  39                 RTS                             
+
+              
+              * BCD ADDITION
+              
+08B8  0C      BCDADD     CLC                             
+08B9  20 0D              BRA      BCDFIX                 
+
+              
+              * BCD SUBTRACTION
+              
+08BB  86 99   BCDSUB     LDA A    #$99                   
+08BD  90 31              SUB A    <TEMP_H                
+08BF  97 31              STA A    <TEMP_H                
+08C1  86 99              LDA A    #$99                   
+08C3  90 32              SUB A    <TEMP_L                
+08C5  97 32              STA A    <TEMP_L                
+08C7  0D                 SEC                             
+08C8  A6 01   BCDFIX     LDA A    $01,X                  
+08CA  99 32              ADC A    <TEMP_L                
+08CC  19                 DAA                             
+08CD  A7 01              STA A    $01,X                  
+08CF  A6 00              LDA A    $00,X                  
+08D1  99 31              ADC A    <TEMP_H                
+08D3  19                 DAA                             
+08D4  A7 00              STA A    $00,X                  
+08D6  39                 RTS                             
+
+              
+              * LONG RANGE SCAN
+              
+08D7  7D 0063 LRSCAN     TST      >DAMLRS                
+08DA  27 03              BEQ      LRSNDM                 
+08DC  7E 0C0B            JMP      RPTDAM                 
+
+08DF  7F 0042 LRSNDM     CLR      >TOPFLG                
+08E2  7F 0043            CLR      >BOTFLG                
+08E5  7F 0044            CLR      >LSDFLG                
+08E8  7F 0045            CLR      >RSDFLG                
+08EB  CE 0DBD            LDX      #LRSCST                
+08EE  BD 04AE            JSR      PSTRNG                 
+08F1  BD 0299            JSR      OUTQUD                 
+08F4  BD 04B3            JSR      PCRLF                  
+08F7  BD 04B3            JSR      PCRLF                  
+08FA  96 47              LDA A    <CURQUX                
+08FC  26 03              BNE      LRSCNT                  
+              *                                           
+08FE  7C 0044            INC      >LSDFLG                
+0901  81 07   LRSCNT     CMP A    #$07                   
+0903  26 03              BNE      LRSCN2                  
+              *                                           
+0905  7C 0045            INC      >RSDFLG                
+0908  96 48   LRSCN2     LDA A    <CURQUY                
+090A  26 03              BNE      LRSCN3                  
+              *                                           
+090C  7C 0042            INC      >TOPFLG                
+090F  81 07   LRSCN3     CMP A    #$07                   
+0911  26 03              BNE      LRSCN4                  
+              *                                           
+0913  7C 0043            INC      >BOTFLG                
+0916  DE 6B   LRSCN4     LDX      <QUDPTR                
+0918  86 F7              LDA A    #$F7                   
+091A  BD 02B2            JSR      FIXXRG                 
+091D  7D 0042            TST      >TOPFLG                
+0920  27 04              BEQ      LRSCN7                 
+0922  8D 5B              BSR      OUTTH0                 
+0924  20 02              BRA      LRSCN8                 
+
+0926  8D 1A   LRSCN7     BSR      OUTLIN                 
+0928  86 05   LRSCN8     LDA A    #$05                   
+092A  BD 02B2            JSR      FIXXRG                 
+092D  8D 13              BSR      OUTLIN                 
+092F  86 05              LDA A    #$05                   
+0931  BD 02B2            JSR      FIXXRG                 
+0934  7D 0043            TST      >BOTFLG                
+0937  27 04              BEQ      LRSCN9                  
+              *                                           
+0939  8D 44              BSR      OUTTH0                 
+093B  20 02              BRA      LRSC10                 
+
+093D  8D 03   LRSCN9     BSR      OUTLIN                 
+093F  7E 02BB LRSC10     JMP      COMAND                 
+
+              
+              * OUTPUT 1 LINE OF LONG RANGE SCAN
+              
+0942  A6 00   OUTLIN     LDA A    $00,X                  
+0944  7D 0044            TST      >LSDFLG                
+0947  27 01              BEQ      OUTLN1                  
+              *                                           
+0949  4F                 CLR A                           
+094A  8D 11   OUTLN1     BSR      OUTQIN                 
+094C  A6 00              LDA A    $00,X                  
+094E  8D 0D              BSR      OUTQIN                 
+0950  A6 00              LDA A    $00,X                  
+0952  7D 0045            TST      >RSDFLG                
+0955  27 01              BEQ      OUTLN3                  
+              *                                           
+0957  4F                 CLR A                           
+0958  8D 03   OUTLN3     BSR      OUTQIN                 
+095A  7E 04B3            JMP      PCRLF                  
+
+              
+              * OUTPUT QUADRANT INFORMATION
+              
+095D  16      OUTQIN     TAB                             
+095E  84 80              AND A    #$80                   
+0960  0C                 CLC                             
+0961  49                 ROL A                           
+0962  49                 ROL A                           
+0963  BD 00EC            JSR      OUTHR                  
+0966  17                 TBA                             
+0967  84 40              AND A    #$40                   
+0969  44                 LSR A                           
+096A  44                 LSR A                           
+096B  BD 00EF            JSR      OUTHL                  
+096E  17                 TBA                             
+096F  84 38              AND A    #$38                   STARS
+0971  48                 ASL A                           
+0972  BD 00EF            JSR      OUTHL                  
+0975  17                 TBA                             
+0976  84 07              AND A    #$07                   KLINGONS
+0978  BD 00EC            JSR      OUTHR                  
+097B  08                 INX                             
+097C  7E 00F2            JMP      OUTS                   
+
+              
+              * OUTPUT A LINE OF ZEROS
+              
+097F  86 03   OUTTH0     LDA A    #$03                   
+0981  97 30              STA A    <COUNT                 
+0983  4F      OUTTH1     CLR A                           
+0984  8D D7              BSR      OUTQIN                 
+0986  7A 0030            DEC      >COUNT                 
+0989  26 F8              BNE      OUTTH1                  
+              *                                           
+098B  7E 04B3            JMP      PCRLF                  
+
+              
+              * FIRE PHASORS
+              
+098E  7D 0064 PHASOR     TST      >DAMPHS                
+0991  27 03              BEQ      PHSNDM                 
+0993  7E 0C0B            JMP      RPTDAM                 
+
+0996  7D 0057 PHSNDM     TST      >SHIELD                
+0999  27 05              BEQ      PHASR1                 
+099B  CE 0DC9            LDX      #MLSHLD                
+099E  20 27              BRA      TOOMC1                 
+
+09A0  CE 0DDC PHASR1     LDX      #ENAVLB                REPORT ENERGY
+09A3  BD 04AE            JSR      PSTRNG                 
+09A6  DE 58              LDX      <ENERGY_H              
+09A8  DF 31              STX      <TEMP_H                
+09AA  BD 0345            JSR      OUTBCD                 
+09AD  CE 0DEF            LDX      #FIRENG                
+09B0  BD 04AE            JSR      PSTRNG                 
+09B3  BD 0A4B            JSR      INBCD                  
+09B6  96 40              LDA A    <PHSENG_H              
+09B8  91 58              CMP A    <ENERGY_H              
+09BA  22 08              BHI      TOOMCH                  
+              *                                           
+09BC  26 0F              BNE      PHASR2                  
+              *                                           
+09BE  96 41              LDA A    <PHSENG_L              
+09C0  91 59              CMP A    <ENERGY_L              
+09C2  23 09              BLS      PHASR2                 
+09C4  CE 0DF9 TOOMCH     LDX      #TOMUCH                
+09C7  BD 04AE TOOMC1     JSR      PSTRNG                 
+09CA  7E 02BB            JMP      COMAND                 
+
+09CD  BD 00FB PHASR2     JSR      RANDOM                 
+09D0  81 F4              CMP A    #$F4                   
+09D2  23 08              BLS      PHASR3                  
+              *                                           
+09D4  CE 0E08            LDX      #PHAMIS                
+09D7  BD 04AE            JSR      PSTRNG                 
+09DA  20 62              BRA      PHASR6                 
+
+09DC  96 40   PHASR3     LDA A    <PHSENG_H              
+09DE  91 3E              CMP A    <KLNENG_H              
+09E0  22 08              BHI      PHASR4                  
+              *                                           
+09E2  26 4A              BNE      PHASR5                  
+              *                                           
+09E4  96 41              LDA A    <PHSENG_L              
+09E6  91 3F              CMP A    <KLNENG_L              
+09E8  23 44              BLS      PHASR5                 
+09EA  7F 003E PHASR4     CLR      >KLNENG_H              
+09ED  7F 003F            CLR      >KLNENG_L              
+09F0  CE 0E11            LDX      #ALKILL                
+09F3  BD 04AE            JSR      PSTRNG                 
+09F6  CE 0E60            LDX      #STILFT                
+09F9  BD 04AE            JSR      PSTRNG                 
+09FC  D6 26              LDA B    <SECKLN                
+09FE  D7 5B              STA B    <HITKLS                
+0A00  96 54              LDA A    <KLNGCT                
+0A02  10                 SBA                             
+0A03  97 54              STA A    <KLNGCT                
+0A05  BD 0273            JSR      OUTKLN                 
+0A08  7F 0026            CLR      >SECKLN                
+0A0B  CE 00B1            LDX      #SECMAP                
+0A0E  86 10              LDA A    #$10                   
+0A10  97 30              STA A    <COUNT                 
+0A12  C6 04   KILAL1     LDA B    #$04                   
+0A14  A6 00              LDA A    $00,X                  
+0A16  46      KILAL2     ROR A                           
+0A17  25 12              BCS      KILAL4                  
+              *                                           
+0A19  46                 ROR A                           
+0A1A  24 01              BCC      KILAL3                 
+0A1C  0C                 CLC                             
+0A1D  5A      KILAL3     DEC B                           
+0A1E  26 F6              BNE      KILAL2                  
+              *                                           
+0A20  46                 ROR A                           
+0A21  A7 00              STA A    $00,X                  
+0A23  08                 INX                             
+0A24  7A 0030            DEC      >COUNT                 
+0A27  26 E9              BNE      KILAL1                 
+0A29  20 13              BRA      PHASR6                 
+
+0A2B  46      KILAL4     ROR A                           
+0A2C  20 EF              BRA      KILAL3                 
+
+0A2E  DE 40   PHASR5     LDX      <PHSENG_H              
+0A30  DF 31              STX      <TEMP_H                
+0A32  CE 003E            LDX      #KLNENG_H              
+0A35  BD 08BB            JSR      BCDSUB                 
+0A38  CE 0E2F            LDX      #KHTADM                
+0A3B  BD 04AE            JSR      PSTRNG                 
+0A3E  DE 40   PHASR6     LDX      <PHSENG_H              
+0A40  DF 31              STX      <TEMP_H                
+0A42  CE 0058            LDX      #ENERGY_H              
+0A45  BD 08BB            JSR      BCDSUB                 
+0A48  7E 02BB            JMP      COMAND                 
+
+              
+              * INPUT A BCD NUMBER
+              
+0A4B  7F 0040 INBCD      CLR      >PHSENG_H              
+0A4E  7F 0041            CLR      >PHSENG_L              
+0A51  BD 00F8 INBCD1     JSR      INEEE                  
+0A54  81 2F              CMP A    #$2F                   
+0A56  23 20              BLS      EXIT                    
+              *                                           
+0A58  8D 1F              BSR      CHECK                  
+0A5A  7D 0027            TST      >FLAGC                 
+0A5D  26 11              BNE      INEROR                  
+              *                                           
+0A5F  C6 04              LDA B    #$04                   
+0A61  78 0041 INBCD2     ASL      >PHSENG_L              
+0A64  79 0040            ROL      >PHSENG_H              
+0A67  5A                 DEC B                           
+0A68  26 F7              BNE      INBCD2                  
+              *                                           
+0A6A  9B 41              ADD A    <PHSENG_L              
+0A6C  97 41              STA A    <PHSENG_L              
+0A6E  20 E1              BRA      INBCD1                 
+
+0A70  CE 0E3D INEROR     LDX      #ERR                   
+0A73  BD 00E9            JSR      PDATA1                 
+0A76  20 D9              BRA      INBCD1                 
+
+0A78  39      EXIT       RTS                             
+
+              
+              * CHECK FOR DECIMAL NUMBER
+              
+0A79  7F 0027 CHECK      CLR      >FLAGC                 
+0A7C  81 39              CMP A    #$39                   
+0A7E  22 03              BHI      SETFLG                 
+0A80  84 0F              AND A    #$0F                   
+0A82  39                 RTS                             
+
+0A83  7C 0027 SETFLG     INC      >FLAGC                 
+0A86  39                 RTS                             
+
+              
+              * SELF DESTRUCT ROUTINE
+              
+0A87  CE 0E53 SELFDE     LDX      #PASWRD                
+0A8A  BD 04AE            JSR      PSTRNG                 
+0A8D  CE 006D            LDX      #L006D                 
+0A90  C6 03              LDA B    #$03                   
+0A92  BD 00F8 SELFD1     JSR      INEEE                  
+0A95  A1 00              CMP A    $00,X                  
+0A97  26 0D              BNE      SELFD2                  
+              *                                           
+0A99  08                 INX                             
+0A9A  5A                 DEC B                           
+0A9B  26 F5              BNE      SELFD1                  
+              *                                           
+0A9D  CE 0EA9 SELFDA     LDX      #DISINT                
+0AA0  BD 04AE            JSR      PSTRNG                 
+0AA3  7E 0B59            JMP      ENDGAM                 
+
+0AA6  CE 0EC2 SELFD2     LDX      #ABORT2                
+0AA9  BD 04AE            JSR      PSTRNG                 
+0AAC  7E 02BB            JMP      COMAND                 
+
+              
+              * TELEPORT ROUTINE
+              
+0AAF  86 12   TELEPT     LDA A    #$12                   
+0AB1  91 3B              CMP A    <TIMUSEL               
+0AB3  22 21              BHI      TELEP2                  
+              *                                           
+0AB5  7D 0068            TST      >TELFLG                
+0AB8  26 25              BNE      TELEP4                  
+              *                                           
+0ABA  BD 00FB            JSR      RANDOM                 
+0ABD  81 B0              CMP A    #$B0                   
+0ABF  23 03              BLS      TELEP1                  
+              *                                           
+0AC1  7C 0068            INC      >TELFLG                
+0AC4  BD 00FB TELEP1     JSR      RANDOM                 
+0AC7  81 B0              CMP A    #$B0                   
+0AC9  22 19              BHI      TELEP5                  
+              *                                           
+0ACB  96 21              LDA A    <BASEX                 
+0ACD  97 47              STA A    <CURQUX                
+0ACF  96 22              LDA A    <BASEY                 
+0AD1  97 48              STA A    <CURQUY                
+0AD3  7E 0757 TELEPA     JMP      STCRSA                 
+
+0AD6  CE 0EDB TELEP2     LDX      #CANTUS                
+0AD9  BD 04AE TELEP3     JSR      PSTRNG                 
+0ADC  7E 02BB            JMP      COMAND                 
+
+0ADF  CE 0FC6 TELEP4     LDX      #DMGDST                
+0AE2  20 F5              BRA      TELEP3                 
+
+0AE4  BD 00FB TELEP5     JSR      RANDOM                 
+0AE7  84 07              AND A    #$07                   
+0AE9  97 47              STA A    <CURQUX                
+0AEB  BD 00FB            JSR      RANDOM                 
+0AEE  84 07              AND A    #$07                   
+0AF0  97 48              STA A    <CURQUY                
+0AF2  CE 0EE6            LDX      #SOMWHR                
+0AF5  BD 04AE            JSR      PSTRNG                 
+0AF8  20 D9              BRA      TELEPA                 
+
+              
+              * KLINGON ATTACK ROUTINE
+              
+0AFA  7D 0026 ATTACK     TST      >SECKLN                ANY Ks?
+0AFD  26 01              BNE      ATTAC1                 
+0AFF  39                 RTS                             
+
+0B00  BD 00FB ATTAC1     JSR      RANDOM                 MAY NOT ATTACK
+0B03  81 B0              CMP A    #$B0                   
+0B05  22 30              BHI      ATTAC2                 
+0B07  CE 0069            LDX      #ATKENG                
+0B0A  D6 26              LDA B    <SECKLN                
+0B0C  58                 ASL B                           
+0B0D  BD 0555            JSR      CSCEXT                 
+0B10  DE 69              LDX      <ATKENG                
+0B12  DF 31              STX      <TEMP_H                
+0B14  7D 0057            TST      >SHIELD                
+0B17  26 1F              BNE      ATTAC3                 
+0B19  CE 0058            LDX      #ENERGY_H              
+0B1C  BD 08BB            JSR      BCDSUB                 
+0B1F  BD 04B3            JSR      PCRLF                  
+0B22  BD 04B3            JSR      PCRLF                  
+0B25  DE 69              LDX      <ATKENG                
+0B27  DF 31              STX      <TEMP_H                
+0B29  BD 0345            JSR      OUTBCD                 
+0B2C  CE 0E71            LDX      #KATKDN                
+0B2F  BD 00E9            JSR      PDATA1                 
+0B32  C6 FA              LDA B    #$FA                   
+0B34  BD 0BE9            JSR      MANDAM                 
+0B37  39      ATTAC2     RTS                             
+
+0B38  CE 003C ATTAC3     LDX      #SHENGY_H              
+0B3B  BD 08BB            JSR      BCDSUB                 
+0B3E  CE 0E87            LDX      #KATKUP                
+0B41  7E 04AE            JMP      PSTRNG                 
+
+              
+              * END OF GAME CLEANUP ROUTINE
+              
+0B44  CE 0F34 NRGOUT     LDX      #NMENGS                
+0B47  BD 04AE NRGOU1     JSR      PSTRNG                 
+0B4A  20 0D              BRA      ENDGAM                 
+
+0B4C  CE 0F40 NOMTIM     LDX      #NMTMST                
+0B4F  20 F6              BRA      NRGOU1                 
+
+0B51  CE 0F4A NOMKLN     LDX      #NMKLST                
+0B54  BD 04AE            JSR      PSTRNG                 
+0B57  20 08              BRA      ENDGM2                 
+
+0B59  CE 0F79 ENDGAM     LDX      #FAILST                
+0B5C  BD 04AE            JSR      PSTRNG                 
+0B5F  20 06              BRA      ENDGM3                 
+
+0B61  CE 0F8B ENDGM2     LDX      #SUCCST                
+0B64  BD 04AE            JSR      PSTRNG                 
+0B67  CE 0FF1 ENDGM3     LDX      #PLAYAG                
+0B6A  BD 04AE            JSR      PSTRNG                 
+0B6D  BD 00F8            JSR      INEEE                  
+0B70  81 4E              CMP A    #$4E                   
+0B72  27 03              BEQ      ENDGM4                 
+0B74  7E 0100            JMP      CONTRL                 
+
+0B77  7E E0E3 ENDGM4     JMP      _SWTBUG                
+
+              
+              * CLEAR OUT CURRENT QUADRANT
+              
+0B7A  DE 6B   CLRCQU     LDX      <QUDPTR                
+0B7C  A6 00              LDA A    $00,X                  
+0B7E  90 5B              SUB A    <HITKLS                CLEAR Ks
+0B80  D6 5C              LDA B    <HITSTR                CLEAR Ss
+0B82  58                 ASL B                           
+0B83  58                 ASL B                           
+0B84  58                 ASL B                           
+0B85  10                 SBA                             
+0B86  7D 005D            TST      >HITBAS                CLEAR B?
+0B89  27 0B              BEQ      CLRCQ2                 
+0B8B  84 BF              AND A    #$BF                   
+0B8D  C6 0A              LDA B    #$0A                   
+0B8F  D7 21              STA B    <BASEX                 
+0B91  D7 22              STA B    <BASEY                 
+0B93  7F 004E            CLR      >CNDFLG                
+0B96  A7 00   CLRCQ2     STA A    $00,X                  
+0B98  4F                 CLR A                           
+0B99  97 5B              STA A    <HITKLS                
+0B9B  97 5C              STA A    <HITSTR                
+0B9D  97 5D              STA A    <HITBAS                
+0B9F  39                 RTS                             
+
+              
+              * FIX DAMAGE ROUTINE
+              
+0BA0  CE 0061 FIXDAM     LDX      #DAMENG                
+0BA3  C6 06              LDA B    #$06                   
+0BA5  6D 00   FIXDM1     TST      $00,X                  
+0BA7  27 02              BEQ      FIXDM2                  
+              *                                           
+0BA9  6A 00              DEC      $00,X                  
+0BAB  08      FIXDM2     INX                             
+0BAC  5A                 DEC B                           
+0BAD  26 F6              BNE      FIXDM1                 
+0BAF  39                 RTS                             
+
+              
+              * SUPERNOVA GENERATOR
+              
+0BB0  BD 00FB SUPNOV     JSR      RANDOM                 
+0BB3  84 07              AND A    #$07                   
+0BB5  16                 TAB                             
+0BB6  BD 00FB            JSR      RANDOM                 
+0BB9  84 07              AND A    #$07                   
+0BBB  D7 5A              STA B    <TSAVE1                
+0BBD  CE 0071            LDX      #QUDMAP                
+0BC0  7C 0020            INC      >STPSFL                
+0BC3  BD 04D4            JSR      STPSEX                 
+0BC6  E6 00              LDA B    $00,X                  
+0BC8  C4 07              AND B    #$07                   
+0BCA  96 54              LDA A    <KLNGCT                
+0BCC  10                 SBA                             
+0BCD  97 54              STA A    <KLNGCT                
+0BCF  86 80              LDA A    #$80                   
+0BD1  A7 00              STA A    $00,X                  
+0BD3  CE 0FAF            LDX      #SUPSTR                
+0BD6  BD 04AE            JSR      PSTRNG                 
+0BD9  96 56              LDA A    <ASAVE                 
+0BDB  BD 025D            JSR      FIXOUT                 
+0BDE  BD 02AD            JSR      OUTDSH                 
+0BE1  96 5A              LDA A    <TSAVE1                
+0BE3  BD 025D            JSR      FIXOUT                 
+0BE6  7E 02BB            JMP      COMAND                 
+
+              
+              * GENERATE MAIN DAMAGE
+              
+0BE9  CE 0061 MANDAM     LDX      #DAMENG                
+0BEC  BD 00FB MANDM1     JSR      RANDOM                 
+0BEF  11                 CBA                             
+0BF0  23 0A              BLS      MANDM2                  
+              *                                           
+0BF2  BD 00FB            JSR      RANDOM                 
+0BF5  84 03              AND A    #$03                   
+0BF7  0D                 SEC                             
+0BF8  A9 00              ADC A    $00,X                  
+0BFA  A7 00              STA A    $00,X                  
+0BFC  08      MANDM2     INX                             
+0BFD  8C 0067            CPX      #DAMENG_9              
+0C00  26 EA              BNE      MANDM1                  
+              *                                           
+0C02  7D 0066            TST      >DAMSHL                
+0C05  27 03              BEQ      MANDM3                  
+              *                                           
+0C07  7F 0057            CLR      >SHIELD                
+0C0A  39      MANDM3     RTS                             
+
+              
+              * REPORT DAMAGE HAS OCCURED
+              
+0C0B  CE 0FC6 RPTDAM     LDX      #DMGDST                
+0C0E  BD 04AE            JSR      PSTRNG                 
+0C11  7E 02BB RPTDM8     JMP      COMAND                 
+
+              
+              * GENERATE A DAMAGE REPORT
+              
+0C14  CE 0FCE DAMRPT     LDX      #DMRPST                
+0C17  BD 04AE            JSR      PSTRNG                 
+0C1A  CE 0FD9            LDX      #DEVSTR                
+0C1D  DF 33              STX      <TEMP2_H               
+0C1F  CE 0061            LDX      #DAMENG                
+0C22  6D 00   DMRPT2     TST      $00,X                  
+0C24  27 21              BEQ      DMRPT3                  
+              *                                           
+0C26  DF 5E              STX      <TEMP3                 
+0C28  DE 33              LDX      <TEMP2_H               
+0C2A  BD 04AE            JSR      PSTRNG                 
+0C2D  08                 INX                             
+0C2E  DF 33              STX      <TEMP2_H               
+0C30  DE 5E              LDX      <TEMP3                 
+0C32  C6 03              LDA B    #$03                   
+0C34  BD 00F2 OUTS4      JSR      OUTS                   output 3 spaces
+0C37  5A                 DEC B                           
+0C38  26 FA              BNE      OUTS4                   
+              *                                           
+0C3A  A6 00              LDA A    $00,X                  
+0C3C  BD 0275            JSR      OUTK0                   
+              *                                           
+0C3F  08      DMRPT4     INX                             
+0C40  8C 0067            CPX      #DAMENG_9              
+0C43  26 DD              BNE      DMRPT2                 
+0C45  20 CA              BRA      RPTDM8                 
+
+0C47  DF 5E   DMRPT3     STX      <TEMP3                 
+0C49  DE 33              LDX      <TEMP2_H               
+0C4B  08                 INX                             
+0C4C  08                 INX                             
+0C4D  08                 INX                             
+0C4E  08                 INX                             
+0C4F  DF 33              STX      <TEMP2_H               
+0C51  DE 5E              LDX      <TEMP3                 
+0C53  20 EA              BRA      DMRPT4                 
+
+0C55          TITLE      FCB      $10
+0C56                     FCC      'SPACE VOYAGE V3.2'
+0C67                     FCB      $04
+0C68          SHTLNG     FCB      $0A
+0C69                     FCC      'S OR L? '
+0C71                     FCB      $04
+0C72          UPSCAS     FCC      ' UP'
+0C75                     FCB      $04
+0C76          BASINF     FCB      $0A
+0C77                     FCC      'BASE IN Q'
+0C80                     FCB      $04
+0C81          DOCKED     FCC      'DOCKED'
+0C87                     FCB      $04
+0C88          DNSCAS     FCC      ' DN'
+0C8B                     FCB      $04
+0C8C          TUBEMT     FCC      'TUBES EMPTY'
+0C97                     FCB      $04
+0C98          INTRO1     FCB      $10
+0C99                     FCB      $16
+0C9A                     FCC      'DATE: '
+0CA0                     FCB      $04
+0CA1          INTRO2     FCC      'KLINGONS: '
+0CAB                     FCB      $04
+0CAC          INTRO3     FCC      'YEARS: '
+0CB3                     FCB      $04
+0CB4          INTRO4     FCC      'QUADRANT: '
+0CBE                     FCB      $04
+0CBF          INTRO6     FCC      'SECTOR: '
+0CC7                     FCB      $04
+0CC8          COMST      FCB      $0A
+0CC9                     FCC      'COMMAND: '
+0CD2                     FCB      $04
+0CD3          DWNST      FCC      'SHIELDS DOWN!'
+0CE0                     FCB      $04
+0CE1          UPSTR      FCC      'SHIELDS UP'
+0CEB                     FCB      $04
+0CEC          CRSSTR     FCC      'COURSE: '
+0CF4                     FCB      $04
+0CF5          WRPSTR     FCC      'WARP FACTOR: '
+0D02                     FCB      $04
+0D03          BLOKST     FCC      'BLOCKED AT S'
+0D0F                     FCB      $04
+0D10          KRMSTR     FCC      'RAMMED KLINGON AT S'
+0D23                     FCB      $04
+0D24          GLBNDS     FCC      'GALAXY LIMIT'
+0D30                     FCB      $04
+0D31          PHITST     FCC      'TORPEDO HIT '
+0D3D                     FCB      $04
+0D3E          PNOENG     FCC      'OUT OF ENERGY'
+0D4B                     FCB      $04
+0D4C          SDATE      FCC      ' '
+0D4D                     FCB      $00
+0D4E                     FCC      'S.DATE: '
+0D56                     FCB      $04
+0D57          CNDTNS     FCC      ' '
+0D58                     FCB      $00
+0D59                     FCC      'CNDTN: '
+0D60                     FCB      $04
+0D61          YELLOW     FCC      'YELLOW'
+0D67                     FCB      $04
+0D68          RED        FCC      'RED'
+0D6B                     FCB      $04
+0D6C          GREEN      FCC      'GREEN'
+0D71                     FCB      $04
+0D72          QUADP      FCC      ' '
+0D73                     FCB      $00
+0D74                     FCC      'QUDRNT: '
+0D7C                     FCB      $04
+0D7D          SECP       FCC      ' '
+0D7E                     FCB      $00
+0D7F                     FCC      'SECTOR: '
+0D87                     FCB      $04
+0D88          ENGSTR     FCC      ' '
+0D89                     FCB      $00
+0D8A                     FCC      'ENERGY: '
+0D92                     FCB      $04
+0D93          KLSTR      FCC      ' '
+0D94                     FCB      $00
+0D95                     FCC      'KLINGONS: '
+0D9F                     FCB      $04
+0DA0          SHSTR      FCC      ' '
+0DA1                     FCB      $00
+0DA2                     FCC      'SHLDS: '
+0DA9                     FCB      $04
+0DAA          TRPSTR     FCC      ' '
+0DAB                     FCB      $00
+0DAC                     FCC      'TORPEDO: '
+0DB5                     FCB      $04
+0DB6          CRLF       FCB      $0D
+0DB7                     FCB      $0A
+0DB8                     FCB      $16
+0DB9                     FCB      $00
+0DBA                     FCB      $00
+0DBB                     FCB      $00
+0DBC                     FCB      $04
+0DBD          LRSCST     FCB      $10
+0DBE                     FCC      'SCAN FOR Q'
+0DC8                     FCB      $04
+0DC9          MLSHLD     FCC      'MUST LOWER SHIELDS'
+0DDB                     FCB      $04
+0DDC          ENAVLB     FCC      'ENERGY AVAILABLE: '
+0DEE                     FCB      $04
+0DEF          FIRENG     FCC      'ENERGY = '
+0DF8                     FCB      $04
+0DF9          TOMUCH     FCC      'ENERGY TOO LOW'
+0E07                     FCB      $04
+0E08          PHAMIS     FCC      'MISFIRE!'
+0E10                     FCB      $04
+0E11          ALKILL     FCC      'ALL LOCAL KLINGONS DESTROYED!' TROYED!'
+0E2E                     FCB      $04
+0E2F          KHTADM     FCC      'ENEMY DAMAGED'
+0E3C                     FCB      $04
+0E3D          ERR        FCC      ' ? '
+0E40                     FCB      $04
+0E41          STARST     FCC      'STAR'
+0E45                     FCB      $04
+0E46          BASEST     FCC      'BASE'
+0E4A                     FCB      $04
+0E4B          KLGSTR     FCC      'KLINGON'
+0E52                     FCB      $04
+0E53          PASWRD     FCB      $0A
+0E54                     FCC      'PASSWORD.. '
+0E5F                     FCB      $04
+0E60          STILFT     FCC      'KLINGONS LEFT = '
+0E70                     FCB      $04
+0E71          KATKDN     FCC      ' UNITS HIT ENTERPRISE'
+0E86                     FCB      $04
+0E87          KATKUP     FCB      $0A
+0E88                     FCC      'KLINGONS ATTACK: SHIELDS HOLDING'
+0EA8                     FCB      $04
+0EA9          DISINT     FCC      'ENTERPRISE DISINTEGRATES' ES'
+0EC1                     FCB      $04
+0EC2          ABORT2     FCC      'SEQUENCE ABORT: PASSWORD' RD'
+0EDA                     FCB      $04
+0EDB          CANTUS     FCC      'TOO EARLY!'
+0EE5                     FCB      $04
+0EE6          SOMWHR     FCC      'MALFUNCTION!'
+0EF2                     FCB      $04
+0EF3          SPSTRM     FCB      $0A
+0EF4                     FCB      $07
+0EF5                     FCC      'SPACE STORM: SHIELDS DAMAGED!'
+0F12                     FCB      $04
+0F13          GALDUM     FCB      $0A
+0F14                     FCB      $07
+0F15                     FCC      'SHIP IS FRIED FOR 3RD ATTEMPT!'
+0F33                     FCB      $04
+0F34          NMENGS     FCB      $07
+0F35                     FCC      'ENERGY = 0'
+0F3F                     FCB      $04
+0F40          NMTMST     FCB      $07
+0F41                     FCC      'TIME UP!'
+0F49                     FCB      $04
+0F4A          NMKLST     FCB      $0A
+0F4B                     FCB      $07
+0F4C                     FCC      'CONGRATULATIONS!'
+0F5C                     FCB      $0D
+0F5D                     FCB      $0A
+0F5E                     FCB      $00
+0F5F                     FCB      $00
+0F60                     FCB      $00
+0F61                     FCB      $00
+0F62                     FCC      'ALL KLINGONS DESTROYED'
+0F78                     FCB      $04
+0F79          FAILST     FCC      'MISSION A FAILURE'
+0F8A                     FCB      $04
+0F8B          SUCCST     FCC      'THE FEDERATION IS SAVED!' D!'
+0FA3                     FCB      $04
+0FA4          SUPDES     FCC      'SUPERNOVA!'
+0FAE                     FCB      $04
+0FAF          SUPSTR     FCB      $0A
+0FB0                     FCB      $07
+0FB1                     FCC      'SUPERNOVA IN Q'
+0FBF                     FCB      $04
+0FC0          HEVDAM     FCC      'BADLY '
+0FC6          DMGDST     FCC      'DAMAGED'
+0FCD                     FCB      $04
+0FCE          DMRPST     FCB      $10
+0FCF                     FCC      'DEV  STAT'
+0FD8                     FCB      $04
+0FD9          DEVSTR     FCC      'ENG'
+0FDC                     FCB      $04
+0FDD                     FCC      'SRS'
+0FE0                     FCB      $04
+0FE1                     FCC      'LRS'
+0FE4                     FCB      $04
+0FE5                     FCC      'PHS'
+0FE8                     FCB      $04
+0FE9                     FCC      'TRP'
+0FEC                     FCB      $04
+0FED                     FCC      'SHL'
+0FF0                     FCB      $04
+0FF1          PLAYAG     FCB      $0A
+0FF2                     FCC      'PLAY AGAIN? '
+0FFE                     FCB      $04
+0FFF                     FCB      $93
+0FFF          
+
+                         ORG      $A048
+
+A048          LA048      FCB      $01
+A049                     FCB      $00
+A04A          LA04A      FCB      $96
+A04B                     FCC      '!L9
+
+              *
+              * External References
+              *
+
+0020          STPSFL     EQU      $0020
+0021          BASEX      EQU      $0021
+0022          BASEY      EQU      $0022
+0023          BASESX     EQU      $0023
+0024          BASESY     EQU      $0024
+0025          GLMFLG     EQU      $0025
+0026          SECKLN     EQU      $0026
+0027          FLAGC      EQU      $0027
+0028          TIMDEC     EQU      $0028
+0029          STCFLG     EQU      $0029
+002A          SQFLG      EQU      $002A
+002B          PNTFLG     EQU      $002B
+002C          COURSE     EQU      $002C
+002D          WARP       EQU      $002D
+002E          FINCX      EQU      $002E
+002F          FINCY      EQU      $002F
+0030          COUNT      EQU      $0030
+0031          TEMP_H     EQU      $0031
+0032          TEMP_L     EQU      $0032
+0033          TEMP2_H    EQU      $0033
+0035          TEMP2_L    EQU      $0035
+0037          TIME0_H    EQU      $0037
+0038          TIME0_L    EQU      $0038
+0039          GAMTIM     EQU      $0039
+003A          TIMUSEH    EQU      $003A
+003B          TIMUSEL    EQU      $003B
+003C          SHENGY_H   EQU      $003C
+003D          SHENGY_L   EQU      $003D
+003E          KLNENG_H   EQU      $003E
+003F          KLNENG_L   EQU      $003F
+0040          PHSENG_H   EQU      $0040
+0041          PHSENG_L   EQU      $0041
+0042          TOPFLG     EQU      $0042
+0043          BOTFLG     EQU      $0043
+0044          LSDFLG     EQU      $0044
+0045          RSDFLG     EQU      $0045
+0046          PHOTON     EQU      $0046
+0047          CURQUX     EQU      $0047
+0048          CURQUY     EQU      $0048
+0049          CURSCX     EQU      $0049
+004A          CURSCY     EQU      $004A
+004B          TRIALX     EQU      $004B
+004C          TRIALY     EQU      $004C
+004D          FLAG       EQU      $004D
+004E          CNDFLG     EQU      $004E
+004F          SCANX      EQU      $004F
+0050          SCANY      EQU      $0050
+0051          COUNT1     EQU      $0051
+0052          SECINF     EQU      $0052
+0053          MASK       EQU      $0053
+0054          KLNGCT     EQU      $0054
+0055          LENGTH     EQU      $0055
+0056          ASAVE      EQU      $0056
+0057          SHIELD     EQU      $0057
+0058          ENERGY_H   EQU      $0058
+0059          ENERGY_L   EQU      $0059
+005A          TSAVE1     EQU      $005A
+005B          HITKLS     EQU      $005B
+005C          HITSTR     EQU      $005C
+005D          HITBAS     EQU      $005D
+005E          TEMP3      EQU      $005E
+0060          GALCNT     EQU      $0060
+0061          DAMENG     EQU      $0061
+0062          DAMSRS     EQU      $0062
+0063          DAMLRS     EQU      $0063
+0064          DAMPHS     EQU      $0064
+0065          DAMPHT     EQU      $0065
+0066          DAMSHL     EQU      $0066
+0067          DAMENG_9   EQU      $0067
+0068          TELFLG     EQU      $0068
+0069          ATKENG     EQU      $0069
+006B          QUDPTR     EQU      $006B
+006D          L006D      EQU      $006D
+0070          PHTFLG     EQU      $0070
+0071          QUDMAP     EQU      $0071
+00B1          SECMAP     EQU      $00B1
+A042          LA042      EQU      $A042
+E067          _OUTHL     EQU      $E067
+E06B          _OUTHR     EQU      $E06B
+E07E          _PDATA     EQU      $E07E
+E0CC          _OUTS      EQU      $E0CC
+E0E3          _SWTBUG    EQU      $E0E3
+E1AC          _INEEE     EQU      $E1AC
+E1D1          _OUTEEE    EQU      $E1D1
+
+                         END      CONTRL

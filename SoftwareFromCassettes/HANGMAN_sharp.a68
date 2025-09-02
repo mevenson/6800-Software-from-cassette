@@ -1,0 +1,327 @@
+*
+* PROGRAM HANGMAN.stx DISSASSEMBLED BY DA68Sharp
+*
+* using control table file HANGMAN.ctl
+*
+'
+
+           ORG      $0100
+
+*
+* SUBROUTINE: START     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+START      BRA      BEGIN                  
+
+*
+* SUBROUTINE: L0102     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+L0102      JMP      LE1D1                  
+
+*
+* SUBROUTINE: L0105     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+L0105      JMP      LE1AC                  
+
+*
+* SUBROUTINE: OUTSTR    
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+OUTSTR     JMP      PDATA                  send to the console
+
+*
+* SUBROUTINE: L010B     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+L010B      JMP      LE0CC                  
+
+L010E      JMP      LE0E3                  
+
+*
+* SUBROUTINE: L0111     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+L0111      JMP      LA04A                  
+
+BEGIN      LDS      #STACK                 set up the stack
+           JSR      PCRLF                  send signon message to the console
+*                                          *  
+           LDX      #SIGNON                send the name of the program to the console
+           JSR      OUTSTR                 
+L0120      JSR      PCRLF                  
+           LDX      #THINKING              I am thinking of a word
+           JSR      OUTSTR                 
+L0129      JSR      L0111                  
+           AND A    #$3F                   
+           BEQ      L0129                  
+           LDA B    #$20                   
+           CBA                             
+           BHI      L0129                  
+           LDX      #L0021                 
+           STX      <L002D                 
+           LDX      #L028D                 
+L013D      INX                             
+           LDA B    $00,X                  
+           CMP B    #$04                   
+           BNE      L013D                  
+           DEC A                           
+           BNE      L013D                  
+           CLR B                           
+           STA B    <L0020                 
+L014A      INX                             
+           STX      <L002B                 
+           LDA A    $00,X                  
+           BEQ      L0129                  
+           LDX      <L002D                 
+           STA A    $00,X                  
+           CMP A    #$04                   
+           BEQ      L0163                  
+           INC B                           
+           INX                             
+           STX      <L002D                 
+           LDX      <L002B                 
+           CLR      $00,X                  
+           BRA      L014A                  
+
+L0163      ADD B    #$30                   
+           TBA                             
+           JSR      L0102                  
+           LDX      #L0255                 
+           JSR      OUTSTR                 
+L016F      JSR      PCRLF                  
+           LDX      #L025E                 
+           JSR      OUTSTR                 
+           JSR      L0105                  
+           CMP A    #$5A                   
+           BHI      L016F                  
+           CMP A    #$41                   
+           BMI      L016F                  
+           LDX      #L0021                 
+L0186      LDA B    $00,X                  
+           CMP B    #$04                   
+           BEQ      L0198                  
+           CBA                             
+           BEQ      L0192                  
+           INX                             
+           BRA      L0186                  
+
+L0192      ORA A    #$80                   
+           STA A    $00,X                  
+           BRA      L019B                  
+
+L0198      INC      >L0020                 
+L019B      JSR      PCRLF                  
+           LDX      #L0021                 
+L01A1      LDA A    $00,X                  
+           BMI      L01AB                  
+           CMP A    #$04                   
+           BEQ      L01B4                  
+           LDA A    #$2D                   
+L01AB      JSR      L0102                  
+           JSR      L010B                  
+           INX                             
+           BRA      L01A1                  
+
+L01B4      JSR      L010B                  
+           JSR      L010B                  
+           LDX      #SIGNON                
+           LDA B    <L0020                 
+           BEQ      L01CA                  
+L01C1      LDA A    $00,X                  
+           JSR      L0102                  
+           INX                             
+           DEC B                           
+           BNE      L01C1                  
+L01CA      LDA A    <L0020                 
+           CMP A    #$07                   
+           BEQ      L01EB                  
+           LDX      #L0021                 
+L01D3      LDA A    $00,X                  
+           CMP A    #$04                   
+           BEQ      L01E1                  
+           BPL      L01DE                  
+           INX                             
+           BRA      L01D3                  
+
+L01DE      JMP      L016F                  
+
+L01E1      BSR      PCRLF                  
+           LDX      #L026B                 
+           JSR      OUTSTR                 
+           BRA      L0202                  
+
+L01EB      BSR      PCRLF                  
+           LDX      #L0274                 
+           JSR      OUTSTR                 
+           LDX      #L0021                 
+L01F6      LDA A    $00,X                  
+           CMP A    #$04                   
+           BEQ      L0202                  
+           JSR      L0102                  
+           INX                             
+           BRA      L01F6                  
+
+L0202      BSR      PCRLF                  
+           BSR      PCRLF                  
+           LDX      #L0282                 
+           JSR      OUTSTR                 
+           JSR      L0105                  
+           CMP A    #$4E                   
+           BEQ      L0216                  
+           JMP      L0120                  
+
+L0216      JMP      L010E                  
+
+*
+* SUBROUTINE: PCRLF     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+PCRLF      LDX      #CRLF                  name of the program
+           JMP      OUTSTR                 send to the screen
+
+CRLF       FCB      $0D
+           FCB      $0A
+           FCB      $00
+           FCB      $00
+           FCB      $00
+           FCB      $00
+           FCB      $04
+SIGNON     FCC      'HANGMAN'
+           FCB      $04
+THINKING   FCC      'I AM THINKING OF A WORD'D'
+           FCB      $0D
+           FCB      $0A
+           FCB      $00
+           FCB      $00
+           FCB      $00
+           FCB      $00
+           FCC      'THAT HAS '
+           FCB      $04
+L0255      FCC      ' LETTERS'
+           FCB      $04
+L025E      FCC      'YOUR GUESS? '
+           FCB      $04
+L026B      FCC      'YOU WIN!'
+           FCB      $04
+L0274      FCC      'THE WORD WAS '
+           FCB      $04
+L0282      FCC      'PLAY AGAIN?'
+L028D      FCC      ' '
+           FCB      $04
+           FCC      'TABLE'
+           FCB      $04
+           FCC      'OCTOPUS'
+           FCB      $04
+           FCC      'HORN'
+           FCB      $04
+           FCC      'WOODEN'
+           FCB      $04
+           FCC      'APPEAL'
+           FCB      $04
+           FCC      'MISUSED'
+           FCB      $04
+           FCC      'APPLIQUE'
+           FCB      $04
+           FCC      'NOVICE'
+           FCB      $04
+           FCC      'ZEBRA'
+           FCB      $04
+           FCC      'ANIMAL'
+           FCB      $04
+           FCC      'COMPUTER'
+           FCB      $04
+           FCC      'HOOK'
+           FCB      $04
+           FCC      'BICYCLE'
+           FCB      $04
+           FCC      'TANDEM'
+           FCB      $04
+           FCC      'ABLE'
+           FCB      $04
+           FCC      'BUILD'
+           FCB      $04
+           FCC      'DONKEY'
+           FCB      $04
+           FCC      'ADVOCATE'
+           FCB      $04
+           FCC      'CHURCH'
+           FCB      $04
+           FCC      'TRUCK'
+           FCB      $04
+           FCC      'TRAVEL'
+           FCB      $04
+           FCC      'ROTATE'
+           FCB      $04
+           FCC      'KNIFE'
+           FCB      $04
+           FCC      'BOAT'
+           FCB      $04
+           FCC      'SHOVEL'
+           FCB      $04
+           FCC      'SUSTAIN'
+           FCB      $04
+           FCC      'COOLER'
+           FCB      $04
+           FCC      'DEAL'
+           FCB      $04
+           FCC      'FATHER'
+           FCB      $04
+           FCC      'FOX'
+           FCB      $04
+           FCC      'GHOST'
+           FCB      $04
+           FCC      'HEIGHT'
+           FCB      $04
+           FCC      'Tk'
+           FCB      $09
+           FCC      'KuBUJ][L'
+
+
+
+           ORG      $A048
+
+LA048      FDB      START                  
+LA04A      LDA A    <L0021                 
+           INC A                           
+           RTS                             
+
+
+*
+* External References
+*
+
+L0020      EQU      $0020
+L0021      EQU      $0021
+L002B      EQU      $002B
+L002D      EQU      $002D
+STACK      EQU      $A042
+PDATA      EQU      $E07E
+LE0CC      EQU      $E0CC
+LE0E3      EQU      $E0E3
+LE1AC      EQU      $E1AC
+LE1D1      EQU      $E1D1
+
+                         END      START

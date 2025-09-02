@@ -1,0 +1,13 @@
+options
+processor,6800
+maxsymbolsize,8
+binaryFile,HANGMAN.stx
+noosequates,Y
+useosequates,N
+forcedirextaddressing,Y
+assemblyoutput,Y
+fillunusedwithrmb,N
+addresscontrols
+021F,B
+A048,A
+A04A,I

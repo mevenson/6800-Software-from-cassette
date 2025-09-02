@@ -1,0 +1,11 @@
+0108,     0,E,send to the console
+0114,     1,E,set up the stack
+0117,     2,E,send signon message to the console
+0117,     3,N, 
+011A,     4,E,send the name of the program to the console
+0123,     5,E,I am thinking of a word
+012E,     6,E,loop
+012E,     7,N, 
+0219,     8,E,name of the program
+021C,     9,E,send to the screen
+022E,    10,E,D'

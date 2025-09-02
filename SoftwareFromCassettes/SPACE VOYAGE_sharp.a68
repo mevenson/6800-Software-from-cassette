@@ -1,0 +1,2131 @@
+*
+* PROGRAM SPACE VOYAGE.stx DISSASSEMBLED BY DA68Sharp
+*
+* using control table file SPACE VOYAGE.ctl
+*
+'
+
+           ORG      $00C0
+
+
+*  NAM STAR TREK
+* ****************************
+*  SPACE VOYAGE V3.2
+*  BY UNKNOWN SOURCE
+*  RECOVERED FROM OLD CASSETTES 
+* 
+* DISASSEMBLED BY Michael Evenson
+* using labels and comments from TSC STAR TREK v1.2
+* ****************************
+* 
+*  MONITOR ROUTINE ADDRESSES
+* 
+* OUTCH EQU $C003
+* INCH EQU $C006
+* CONTRL EQU $C000
+* 
+*  STORAGE AREAS
+
+L00C0      FCB      $00
+MOVTBL     FCB      $00,$FF,$01,$FF,$01,$00,$01,$01
+           FCB      $00,$01,$FF,$01,$FF,$00,$FF,$FF
+
+*  CHARACTER PRINT TABLE
+* 
+
+CHRTBL     FCC      '.*KB'
+JMPTBL     FDB      SETCRS                 
+           FDB      SRSCAN                 
+           FDB      LRSCAN                 
+           FDB      PHASOR                 
+           FDB      PHOTOR                 
+           FDB      DAMRPT                 
+           FDB      SHLDUP                 
+           FDB      SHLDWN                 
+           FDB      TELEPT                 
+           FDB      SELFDE                 
+*
+* SUBROUTINE: PDATA1    
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+PDATA1     JMP      _PDATA                 
+
+*
+* SUBROUTINE: OUTHR     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+OUTHR      JMP      _OUTHR                 
+
+*
+* SUBROUTINE: OUTHL     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+OUTHL      JMP      _OUTHL                 
+
+*
+* SUBROUTINE: OUTS      
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+OUTS       JMP      _OUTS                  
+
+*
+* SUBROUTINE: OUTEEE    
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+OUTEEE     JMP      _OUTEEE                
+
+*
+* SUBROUTINE: INEEE     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+INEEE      JMP      _INEEE                 
+
+
+* this is some crap that was left over in memory when it was saved
+
+RANDOM     JMP      LA04A                  
+
+           STA A    $61,X                  
+
+*  PROGRAM ENTRY
+* 
+
+CONTRL     LDS      #LA042                 
+           LDX      #TITLE                 
+           JSR      PSTRNG                 send to console
+
+* CLEAR ALL TEMP STORAGE
+
+           LDX      #STPSFL                
+SETCLR     CLR A                           
+           STA A    $00,X                  
+           INX                             
+           CPX      #MOVTBL                
+           BNE      SETCLR                 loop
+*                                          *  
+           LDX      #SHTLNG                ask if short or long game
+           JSR      PSTRNG                 
+           JSR      INEEE                  get response
+           CMP A    #$53                   (S)hort?
+           BEQ      SETQD                  yes - set up for short game
+*                                          *  
+           INC      >LENGTH                increment type of game value
+
+* SETUP SPACE
+
+SETQD      LDX      #QUDMAP                
+           LDA B    #$40                   
+SETUP0     JSR      RANDOM                 
+           CMP A    #$FC                   
+           BLS      SETUP1                  
+*                                          *  
+           LDA A    #$04                   
+           BRA      SETUP5                 
+
+SETUP1     CMP A    #$F7                   
+           BLS      SETUP2                  
+*                                          *  
+           LDA A    #$03                   
+           BRA      SETUP5                 
+
+SETUP2     CMP A    #$E0                   
+           BLS      SETUP3                  
+*                                          *  
+           LDA A    #$02                   
+           BRA      SETUP5                 
+
+SETUP3     CMP A    #$A0                   
+           BLS      SETUP4                  
+*                                          *  
+           LDA A    #$01                   
+           BRA      SETUP5                 
+
+SETUP4     CLR A                           
+SETUP5     CLR      >ASAVE                 
+           TST      >LENGTH                
+           BEQ      SETUP8                  
+*                                          *  
+           STA A    <ASAVE                 
+           JSR      RANDOM                 
+           CMP A    #$F0                   
+           BLS      SETUP6                  
+*                                          *  
+           LDA A    #$03                   
+           BRA      SETUP8                 
+
+SETUP6     CMP A    #$C0                   
+           BLS      SETUP7                  
+*                                          *  
+           LDA A    #$02                   
+           BRA      SETUP8                 
+
+SETUP7     CLR A                           
+SETUP8     ADD A    <ASAVE                 
+           STA A    $00,X                  
+           ADD A    <KLNGCT                
+           STA A    <KLNGCT                
+           JSR      RANDOM                 
+           AND A    #$38                   
+           ORA A    $00,X                  
+           STA A    $00,X                  
+           INX                             
+           DEC B                           
+           BEQ      CONT1                  
+           JMP      SETUP0                 
+
+
+* GET STARBASE LOCATION
+
+CONT1      JSR      RANDOM                 
+           AND A    #$07                   
+           TAB                             
+           JSR      RANDOM                 
+           AND A    #$07                   
+           STA A    <BASEX                 
+           STA B    <BASEY                 
+           INC      >STPSFL                
+           LDX      #QUDMAP                
+           JSR      STPSEX                 
+           LDA A    #$40                   
+           ORA A    $00,X                  
+           STA A    $00,X                  
+           BSR      REFUEL                 
+           JSR      RANDOM                 
+           ADD A    #$00                   
+           DAA                             
+           STA A    <TIME0_L               
+           JSR      RANDOM                 
+           AND A    #$7F                   
+           ORA A    #$10                   this is #$23 in STAR TREK
+           ADD A    #$00                   
+           DAA                             
+           STA A    <TIME0_H               
+           BSR      MAKTIM                 
+           TST      >LENGTH                
+           BEQ      GATM                   
+           TAB                             
+           BSR      MAKTIM                 
+           SUB A    #$03                   
+           ABA                             
+           DAA                             
+GATM       STA A    <GAMTIM                
+           BRA      CONT3                  
+
+
+* REFUEL THE ENTERPRISE
+
+REFUEL     CLR      >SHIELD                
+           LDA A    #$30                   
+           STA A    <ENERGY_H              
+           STA A    <SHENGY_H              
+           CLR      >ENERGY_L              
+           CLR      >SHENGY_L              
+           LDA A    #$0F                   
+           STA A    <PHOTON                
+           LDX      #DAMENG                FIX ALL DAMAGE
+REFUL1     CLR      $00,X                  
+           INX                             
+           CPX      #DAMENG_9              
+           BNE      REFUL1                 
+           RTS                             
+
+
+* CALCULATE GAME TIME
+
+MAKTIM     JSR      RANDOM                 
+           AND A    #$0F                   
+           ORA A    #$22                   #$31 in Star Trek 1.2 asm file
+           ADD A    #$00                   
+           DAA                             
+           RTS                             
+
+
+* CONTINUE SETUP
+
+CONT3      JSR      RANDOM                 SET SHUTTLECRAFT LOCATION
+           AND A    #$07                   
+           STA A    <CURQUX                also - SHUTLX in Start Trek 1.2 asm file
+           JSR      RANDOM                 
+           AND A    #$07                   
+           STA A    <CURQUY                also - SHUTLY in Star Trek 1.2 asm file
+           JSR      SETUPS                 
+           LDX      #BASINF                
+           JSR      PSTRNG                 
+           LDA A    <BASEX                 
+           BSR      FIXOUT                 
+           JSR      OUTDSH                 
+           LDA A    <BASEY                 
+           BSR      FIXOUT                 
+           LDX      #PASWRD                
+           JSR      PSTRNG                 
+           LDX      #L006D                 
+           LDA B    #$03                   
+CONT4      JSR      INEEE                  
+           STA A    $00,X                  
+           INX                             
+           DEC B                           
+           BNE      CONT4                   
+*                                          *  
+           LDX      #INTRO1                
+           JSR      PSTRNG                 
+           BSR      OUTDAT                 
+           LDX      #INTRO2                
+           JSR      PSTRNG                 
+           BSR      OUTKLN                 
+           LDX      #INTRO3                
+           JSR      PSTRNG                 
+           CLR      >TEMP_H                
+           LDA A    <GAMTIM                
+           STA A    <TEMP_L                
+           JSR      OUTBCD                 
+           LDX      #INTRO4                
+           JSR      PSTRNG                 
+           BSR      OUTQUD                 
+           LDX      #INTRO6                
+           JSR      PSTRNG                 
+           BSR      OUTSEC                 
+           JMP      COMAND                 
+
+
+* OUTPUT A NUMBER
+
+FIXOUT     ADD A    #$31                   
+           JMP      OUTEEE                 
+
+
+* OUTPUT STARDATE
+
+OUTDAT     LDX      <TIME0_H               
+           STX      <TEMP_H                
+           JSR      OUTBCD                 
+           LDA A    #$2E                   
+           JSR      OUTEEE                 
+           LDA A    <TIMDEC                
+           JMP      OUTHR                  
+
+
+* OUTPUT A KLINGON COUNT
+
+OUTKLN     LDA A    <KLNGCT                
+*
+* SUBROUTINE: OUTK0     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+OUTK0      CLR      >TEMP_H                
+OUTK1      CLR      >TEMP_L                
+           LDA B    #$0A                   
+OUTK2      SBA                             
+           BCS      OUTK3                  
+           INC      >TEMP_L                
+           CMP B    <TEMP_L                
+           BNE      OUTK2                  
+           INC      >TEMP_H                
+           BRA      OUTK1                  
+
+OUTK3      ABA                             
+           LDA B    <TEMP_L                
+           ASL B                           
+           ASL B                           
+           ASL B                           
+           ASL B                           
+           ABA                             
+           STA A    <TEMP_L                
+           JMP      OUTBCD                 
+
+
+* OUTPUT QUADRANT LOCATION
+
+OUTQUD     LDA A    <CURQUX                
+           BSR      FIXOUT                 
+           BSR      OUTDSH                 
+           LDA A    <CURQUY                
+           BRA      FIXOUT                 
+
+
+* OUTPUT A SECTOR
+* 
+*     Star Trek 1.2 outputs CURSCY first, then CURSCX
+
+OUTSEC     LDA A    <CURSCX                
+           BSR      FIXOUT                 
+           BSR      OUTDSH                 
+           LDA A    <CURSCY                
+           BRA      FIXOUT                 
+
+
+* OUTPUT A DASH
+
+OUTDSH     LDA A    #$2D                   
+           JMP      OUTEEE                 
+
+
+* ADD THE A-REG TO THE INDEX REGISTER
+
+FIXXRG     STX      <TEMP_H                
+           ADD A    <TEMP_L                
+           STA A    <TEMP_L                
+           LDX      <TEMP_H                
+           RTS                             
+
+
+* GET COMMAND AND PERFORM IT
+
+COMAND     LDA A    <GAMTIM                
+           CMP A    <TIMUSEL               
+           BHI      NOEXTC                 
+           JMP      NOMTIM                 
+
+NOEXTC     TST      >KLNGCT                
+           BNE      NOEXT2                 
+           JMP      NOMKLN                 
+
+NOEXT2     TST      >DAMENG_9              SUPFLG in Star Trek 1.2 asm file
+           BEQ      NOEXT4                 
+           LDX      #SUPDES                
+           JSR      PSTRNG                 
+           JMP      SELFDA                 JSR SELFDA and JMP ENDGAM in Star Trek 1.2 asm file
+
+NOEXT4     JSR      CLRCQU                 CLEAR K & S
+           LDA A    #$02                   
+           CMP A    <CNDFLG                DOCKED?
+           BEQ      CMND27                  
+*                                          *  
+           CLR      >CNDFLG                
+           TST      >SECKLN                RED?
+           BEQ      CMNDAC                  
+*                                          *  
+           DEC A                           
+           STA A    <CNDFLG                
+CMNDAC     JSR      RANDOM                 
+           CMP A    #$FC                   SPACE STORM
+           BLS      COMND2                  
+*                                          *  
+           LDX      #SPSTRM                
+           JSR      PSTRNG                 
+           LDA A    #$02                   
+           STA A    <DAMSHL                
+           JMP      SHLDWN                 JSR SHLDWN in Star Trek 1.2 asm file
+
+COMND2     JSR      RANDOM                 
+           CMP A    #$FC                   SUPERNOVA?
+           BLS      CMND25                  
+*                                          *  
+           JMP      SUPNOV                 
+
+CMND25     JSR      ATTACK                 ALLOW ATTACK
+           TST      >ENERGY_H              
+           BPL      COMND0                  
+*                                          *  
+           JMP      NRGOUT                 
+
+COMND0     LDA A    #$03                   
+           CMP A    <ENERGY_H              
+           BLS      CMNDAD                  
+*                                          *  
+           STA A    <CNDFLG                
+CMNDAD     TST      >SHENGY_H              
+           BPL      CMND27                 
+           CLR A                           
+           STA A    <SHIELD                
+           STA A    <SHENGY_H              
+           STA A    <SHENGY_L              
+CMND27     LDX      #COMST                 PRINT COMMAND PROMPT
+           JSR      PSTRNG                 
+           CLR      >STCFLG                
+           CLR      >PHTFLG                
+           JSR      INCHCK                 
+           ASL A                           
+           LDX      #JMPTBL                
+           JSR      FIXXRG                 
+           LDX      $00,X                  
+           JMP      $00,X                  
+
+*
+* SUBROUTINE: OUTBCD    
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+OUTBCD     CLR      >FLAG                  
+           LDA A    <TEMP_H                
+           BEQ      OUTBC2                  
+*                                          *  
+           AND A    #$F0                   
+           BEQ      OUTBC1                  
+*                                          *  
+           LDA A    <TEMP_H                
+           JSR      OUTHL                  
+OUTBC1     LDA A    <TEMP_H                
+           JSR      OUTHR                  
+           INC      >FLAG                  
+OUTBC2     LDA A    <TEMP_L                
+           TST      >FLAG                  
+           BNE      NOZERO                  
+*                                          *  
+           AND A    #$F0                   
+           BEQ      OUTBC3                  
+*                                          *  
+NOZERO     JSR      OUTHL                  
+OUTBC3     LDA A    <TEMP_L                
+           JMP      OUTHR                  
+
+
+* LOWER THE SHIELDS
+
+SHLDWN     CLR      >SHIELD                
+           LDX      #DWNST                 
+SHLD0      JSR      PSTRNG                 
+SHLD1      JMP      COMAND                 
+
+
+* RAISE THE SHIELDS
+
+SHLDUP     LDA A    <SHENGY_H              
+           CMP A    #$01                   
+           BLS      SHLD1                  
+           TST      >DAMSHL                
+           BNE      SHLDWN                 
+           INC      >SHIELD                
+           LDX      #SHENGY_H              
+           LDA A    #$02                   
+           STA A    <TEMP_H                
+           CLR      >TEMP_L                
+           JSR      BCDSUB                 
+           LDX      #UPSTR                 
+           BRA      SHLD0                  
+
+
+* SHORT RANGE SCAN
+
+SRSCAN     TST      >DAMSRS                
+           BEQ      SSCAN1                 
+           JMP      RPTDAM                 
+
+SSCAN1     JSR      PCRLF                  
+           CLR      >SCANY                 
+           LDA A    <CNDFLG                
+           CMP A    #$02                   
+           BNE      SSCAN2                  
+*                                          *  
+           JSR      REFUEL                 
+SSCAN2     LDX      #SECMAP                
+           STX      <TEMP2_H               
+           JSR      DOSCAN                 
+           LDX      #SDATE                 
+           JSR      PDATA1                 
+           JSR      OUTDAT                 
+           JSR      DOSCAN                 
+           LDX      #CNDTNS                
+           JSR      PDATA1                 
+           LDA A    <CNDFLG                
+           BEQ      SRSCN1                  
+*                                          *  
+           CMP A    #$01                   
+           BEQ      SRSCN0                  
+*                                          *  
+           CMP A    #$03                   
+           BEQ      OUTCN1                  
+*                                          *  
+           LDX      #DOCKED                
+           BRA      OUTCND                 
+
+OUTCN1     LDX      #YELLOW                
+OUTCND     JSR      PDATA1                 
+           BRA      SRSCN2                 
+
+SRSCN0     LDX      #RED                   
+           BRA      OUTCND                 
+
+SRSCN1     LDX      #GREEN                 
+           BRA      OUTCND                 
+
+SRSCN2     BSR      DOSCAN                 
+           LDX      #QUADP                 
+           JSR      PDATA1                 
+           JSR      OUTQUD                 
+           BSR      DOSCAN                 
+           LDX      #SECP                  
+           JSR      PDATA1                 
+           JSR      OUTSEC                 
+           BSR      DOSCAN                 
+           LDX      #ENGSTR                
+           JSR      PDATA1                 
+           LDX      <ENERGY_H              
+           STX      <TEMP_H                
+           JSR      OUTBCD                 
+           BSR      DOSCAN                 
+           LDX      #KLSTR                 
+           JSR      PDATA1                 
+           JSR      OUTKLN                 
+           BSR      DOSCAN                 
+           LDX      #SHSTR                 
+           JSR      PDATA1                 
+           LDX      <SHENGY_H              
+           STX      <TEMP_H                
+           JSR      OUTBCD                 
+           TST      >SHIELD                
+           BEQ      SRSCN4                 
+           LDX      #UPSCAS                
+           BRA      SRSCN5                 
+
+SRSCN4     LDX      #DNSCAS                
+SRSCN5     JSR      PDATA1                 
+           BSR      DOSCAN                 
+           LDX      #TRPSTR                
+           JSR      PDATA1                 
+           CLR      >TEMP_H                
+           LDA A    <PHOTON                
+           ADD A    #$00                   
+           DAA                             
+           STA A    <TEMP_L                
+           JSR      OUTBCD                 
+           JMP      COMAND                 
+
+
+* OUTPUT 1 SHORT RANGE SCAN LINE
+
+DOSCAN     JSR      PCRLF                  
+           LDA A    #$02                   
+           STA A    <COUNT                 
+           CLR      >SCANX                 
+DOSCN      LDA A    #$04                   
+           STA A    <COUNT1                
+           LDX      <TEMP2_H               
+           LDA A    $00,X                  
+DOSCN0     STA A    <ASAVE                 
+           LDA A    <CURSCY                
+           CMP A    <SCANY                 
+           BNE      CHK0                   
+           LDA A    <CURSCX                
+           CMP A    <SCANX                 
+           BNE      CHK0                   
+           LDA A    #$45                   
+           JSR      OUTEEE                 
+           BRA      GOAHD                  
+
+CHK0       LDA A    <ASAVE                 
+DOSCN1     LDX      #CHRTBL                
+           AND A    #$03                   
+           JSR      FIXXRG                 
+           LDA A    $00,X                  
+           JSR      OUTEEE                 
+GOAHD      JSR      OUTS                   
+           LDX      <TEMP2_H               
+           INC      >SCANX                 
+           DEC      >COUNT1                
+           BEQ      DOSCN2                 
+           LDA A    <ASAVE                 
+           LSR A                           
+           LSR A                           
+           BRA      DOSCN0                 
+
+DOSCN2     INX                             
+           STX      <TEMP2_H               
+           LDA A    $00,X                  
+           DEC      >COUNT                 
+           BNE      DOSCN                  
+           INC      >SCANY                 
+           RTS                             
+
+*
+* SUBROUTINE: PSTRNG    
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+PSTRNG     BSR      PCRLF                  
+           JMP      PDATA1                 
+
+*
+* SUBROUTINE: PCRLF     
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+PCRLF      STX      <TEMP2_L               
+           LDX      #CRLF                  
+           JSR      PDATA1                 
+           LDX      <TEMP2_L               
+           RTS                             
+
+*
+* SUBROUTINE: SETUPS    
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+SETUPS     CLR      >SECKLN                
+           LDX      #SECMAP                
+           LDA B    #$10                   
+           CLR A                           
+SETPS1     STA A    $00,X                  
+           INX                             
+           DEC B                           
+           BNE      SETPS1                  
+*                                          *  
+           LDX      #QUDMAP                
+           LDA A    <CURQUX                
+           LDA B    <CURQUY                
+*
+* SUBROUTINE: STPSEX    
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+STPSEX     STA A    <ASAVE                 
+           TST B                           
+           BEQ      SETPS4                  
+*                                          *  
+SETPS2     LDA A    #$08                   
+SETPS3     INX                             
+           DEC A                           
+           BNE      SETPS3                  
+*                                          *  
+           DEC B                           
+           BNE      SETPS2                 
+SETPS4     LDA A    <ASAVE                 
+           BEQ      SETPS6                  
+*                                          *  
+SETPS5     INX                             
+           DEC A                           
+           BNE      SETPS5                  
+*                                          *  
+SETPS6     TST      >STPSFL                
+           BEQ      STPSNX                 
+           CLR      >STPSFL                
+           RTS                             
+
+STPSNX     STX      <QUDPTR                
+           LDA B    $00,X                  
+           STA B    <SECINF                
+           BEQ      SETP10                  
+*                                          *  
+           AND B    #$07                   
+           BEQ      SETPS7                  
+*                                          *  
+           STA B    <COUNT                 
+           STA B    <SECKLN                
+           LDA A    #$02                   
+           STA A    <MASK                  
+           BSR      PUTINM                  
+*                                          *  
+SETPS7     LDA B    <SECINF                
+           AND B    #$38                   
+           BEQ      SETPS8                  
+*                                          *  
+           LSR B                           
+           LSR B                           
+           LSR B                           
+           STA B    <COUNT                 
+           LDA A    #$01                   
+           STA A    <MASK                  
+           BSR      PUTINM                  
+*                                          *  
+SETPS8     LDA B    <SECINF                
+           BIT B    #$40                   
+           BEQ      SETPS9                  
+*                                          *  
+           LDA A    #$01                   
+           STA A    <COUNT                 
+           LDA A    #$03                   
+           STA A    <MASK                  
+           BSR      PUTINM                 
+SETPS9     LDA B    <SECINF                
+           BPL      SETP10                 
+           INC      >DAMENG_9              
+SETP10     JSR      RANDOM                 
+           AND A    #$07                   
+           STA A    <TRIALX                
+           JSR      RANDOM                 
+           AND A    #$07                   
+           STA A    <TRIALY                
+           JSR      CHKPOS                 
+           TST      >FLAG                  
+           BNE      SETP10                 
+           LDA A    <TRIALX                
+           STA A    <CURSCX                
+           LDA A    <TRIALY                
+           STA A    <CURSCY                
+
+* COMPUTE LOCAL KLINGON ENERGY
+
+           LDA B    <SECKLN                
+           ASL B                           
+           LDX      #KLNENG_H              
+*
+* SUBROUTINE: CSCEXT    
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+CSCEXT     CLR      $00,X                  
+           CLR      $01,X                  
+CSCKN1     JSR      RANDOM                 
+           ADD A    #$00                   
+           DAA                             
+           CLR      >TEMP_H                
+           STA A    <TEMP_L                
+           JSR      BCDADD                 
+           DEC B                           
+           BNE      CSCKN1                 
+           RTS                             
+
+
+* PUT OBJECTS IN SECTOR MAP
+
+PUTINM     LDX      #SECMAP                
+           JSR      RANDOM                 
+           AND A    #$0F                   
+           STA A    <TSAVE1                
+           JSR      FIXXRG                 
+           LDA B    $00,X                  
+           JSR      RANDOM                 
+           AND A    #$03                   
+           STA A    <ASAVE                 
+           BEQ      PUTIN2                  
+*                                          *  
+PUTIN1     ROR B                           
+           ROR B                           
+           DEC A                           
+           BNE      PUTIN1                  
+*                                          *  
+PUTIN2     BIT B    #$03                   
+           BNE      PUTINM                 
+           ORA B    <MASK                  
+           LDA A    <ASAVE                 
+           BEQ      PUTIN4                  
+*                                          *  
+PUTIN3     ROL B                           
+           ROL B                           
+           DEC A                           
+           BNE      PUTIN3                  
+*                                          *  
+PUTIN4     STA B    $00,X                  
+           DEC      >COUNT                 
+           BNE      PUTINM                 
+           LDA A    <MASK                  
+           CMP A    #$03                   
+           BNE      PUTIN6                  
+*                                          *  
+           LDA B    <TSAVE1                
+           CLC                             
+           ROR B                           
+           LDA A    <ASAVE                 
+           BCC      PUTIN5                  
+*                                          *  
+           ADD A    #$04                   
+PUTIN5     STA A    <BASESX                
+           STA B    <BASESY                
+PUTIN6     RTS                             
+
+
+* CHECK FOR EMPTY POSITIONS
+
+CHKPOS     CLR      >FLAG                  
+           STX      <TEMP2_L               
+           LDX      #SECMAP                
+           LDA A    <TRIALY                
+           BEQ      CHKPO2                  
+*                                          *  
+CHKPO1     INX                             
+           INX                             
+           DEC A                           
+           BNE      CHKPO1                  
+*                                          *  
+CHKPO2     LDA A    <TRIALX                
+           CMP A    #$03                   
+           BLS      CHKPO3                  
+*                                          *  
+           INX                             
+           SUB A    #$04                   
+CHKPO3     LDA B    $00,X                  
+           STA A    <ASAVE                 
+           BEQ      CHKPO5                  
+*                                          *  
+CHKPO4     LSR B                           
+           LSR B                           
+           DEC A                           
+           BNE      CHKPO4                  
+*                                          *  
+CHKPO5     AND B    #$03                   
+           BEQ      CHKPO6                  
+*                                          *  
+           STA B    <FLAG                  
+           TST      >STCFLG                
+           BEQ      CHKPO6                  
+*                                          *  
+           TST      >PHTFLG                
+           BNE      CHKPO7                  
+*                                          *  
+           CMP B    #$02                   
+           BEQ      CHKPO7                 
+CHKPO6     LDX      <TEMP2_L               
+           RTS                             
+
+CHKPO7     LDA B    #$FC                   
+           LDA A    <ASAVE                 
+           BEQ      CHKPO9                  
+*                                          *  
+           SEC                             
+CHKPO8     ROL B                           
+           ROL B                           
+           DEC A                           
+           BNE      CHKPO8                  
+*                                          *  
+CHKPO9     AND B    $00,X                  
+           STA B    $00,X                  
+           BRA      CHKPO6                 
+
+
+* FIRE PHOTON TORPEDO
+
+PHOTOR     TST      >DAMPHT                
+           BEQ      PTRNDM                  
+*                                          *  
+PTRND9     JMP      RPTDAM                 
+
+PTRNDM     TST      >PHOTON                ANY LEFT
+           BNE      PHOTRO                  
+*                                          *  
+           JMP      PTEMPT                 TUBES EMPTY
+
+PHOTRO     INC      >PHTFLG                
+           JSR      RANDOM                 
+           AND A    #$0F                   
+           ORA A    #$04                   
+           STA A    <WARP                  
+           DEC      >PHOTON                
+
+* WARP ENGINES AND PHOTON TORP COURSE
+
+SETCRS     CLR      >SQFLG                 
+           CLR      >GLMFLG                
+           LDX      #CRSSTR                
+           JSR      PSTRNG                 
+           JSR      INCHCK                 
+           CMP A    #$07                   
+           BHI      ABC29                   
+*                                          *  
+           STA A    <COURSE                
+           TST      >PHTFLG                
+           BNE      PHTOR1                  
+*                                          *  
+           LDX      #WRPSTR                
+           JSR      PSTRNG                 
+           JSR      INCHCK                 
+           STA A    <WARP                  
+           TST      >PNTFLG                
+           BNE      STCRS2                  
+*                                          *  
+           STA A    <SQFLG                 
+           TST      >DAMENG                
+           BNE      PTRND9                  
+*                                          *  
+           BRA      STCRS2                 
+
+STCRS2     JSR      INEEE                  
+           CMP A    #$0D                   
+           BNE      STCRS2                 
+           LDA A    <COURSE                
+PHTOR1     LDX      #MOVTBL                
+           ASL A                           
+           JSR      FIXXRG                 
+           LDA A    <WARP                  
+           BNE      ABC30                   
+*                                          *  
+ABC29      JMP      COMAND                 
+
+ABC30      STA A    <COUNT                 
+           TST      >SQFLG                 
+           BEQ      STCRS3                  
+*                                          *  
+           LDA A    #$0F                   
+           STA A    <COUNT                 
+STCRS3     LDA A    <CURSCX                
+           LDA B    <CURSCY                
+PHTOR2     ADD A    $00,X                  
+           ADD B    $01,X                  
+           JSR      TSTBND                 
+           TST      >FINCX                 
+           BEQ      ABC1                    
+*                                          *  
+           JMP      STCRS5                 
+
+ABC1       TST      >FINCY                 
+           BEQ      ABC5                    
+*                                          *  
+           JMP      STCRS5                 
+
+ABC5       STA A    <TRIALX                SAVE TRIAL POSITION
+           STA B    <TRIALY                
+           TST      >PHTFLG                
+           BEQ      ABC4                    
+*                                          *  
+           JSR      PCRLF                  
+           BSR      OBATSO                  
+*                                          *  
+ABC4       INC      >STCFLG                
+           JSR      CHKPOS                 CHK IF BLKD
+           LDA A    <FLAG                  
+           BEQ      STCRS4                  
+*                                          *  
+           TST      >PHTFLG                
+           BEQ      ABC2                    
+*                                          *  
+           JMP      PHTOR3                 
+
+ABC2       CMP A    #$02                   
+           BNE      ABC3                    
+*                                          *  
+           JMP      KLGRAM                 
+
+ABC3       LDX      #BLOKST                
+           JSR      PSTRNG                 
+*
+* SUBROUTINE: OBATSO    
+*
+*   ENTRY:  
+*
+*   EXIT:   
+*
+OBATSO     LDA A    <TRIALX                Star Trek 1.2 does TRIALY before TRIALX
+           JSR      FIXOUT                 
+           JSR      OUTDSH                 
+           LDA A    <TRIALY                
+           JSR      FIXOUT                 
+           TST      >PHTFLG                
+           BEQ      STCRET                  
+*                                          *  
+           RTS                             
+
+STCRET     JMP      STCRS6                 
+
+STCRS4     TST      >PHTFLG                
+           BEQ      STCRSB                 JUMP IF NOT
+           LDA A    <TRIALX                
+           LDA B    <TRIALY                
+           DEC      >COUNT                 
+           BNE      PHTOR2                 
+           JMP      PHTOR4                 out of energy
+
+STCRSB     LDA A    <TRIALX                
+           STA A    <CURSCX                
+           LDA A    <TRIALY                
+           STA A    <CURSCY                
+           JSR      RANDOM                 
+           CMP A    #$80                   
+           BLS      STCRSC                  
+*                                          *  
+           LDA A    #$01                   
+           JSR      FIXTIM                 
+           LDA A    #$03                   
+           JSR      FIXENG                 
+STCRSC     DEC      >COUNT                 
+           BEQ      STCRSD                  
+*                                          *  
+           JMP      STCRS3                 
+
+STCRSD     TST      >SQFLG                 
+           BNE      STCRS5                 
+           JMP      STCRS6                 
+
+STCRS5     TST      >PHTFLG                
+           BEQ      ABC6                    
+*                                          *  
+           JMP      PHTOR4                 
+
+ABC6       LDA A    <WARP                  
+           STA A    <COUNT                 
+ABC7       LDA A    <CURQUX                
+           LDA B    <CURQUY                
+           TST      >SQFLG                 
+           BEQ      STCRS7                  
+*                                          *  
+           ADD A    $00,X                  
+           ADD B    $01,X                  
+           STA A    <TRIALX                
+           STA B    <TRIALY                
+           JSR      TSTBND                 
+           TST      >FINCX                 
+           BEQ      ABCD0                   
+*                                          *  
+           JMP      GALBND                 
+
+ABCD0      TST      >FINCY                 
+           BEQ      ABCD1                   
+*                                          *  
+           JMP      GALBND                 
+
+ABCD1      LDA A    <TRIALX                
+           STA A    <CURQUX                
+           LDA A    <TRIALY                
+           STA A    <CURQUY                
+           INC      >GLMFLG                
+           LDA A    #$06                   
+           JSR      FIXTIM                 
+           LDA A    #$30                   
+           JSR      FIXENG                 
+           DEC      >COUNT                 
+           BNE      ABC7                    
+*                                          *  
+STCRSA     JSR      SETUPS                 
+STCRS6     CLR      >CNDFLG                
+           LDA A    <BASEX                 
+           CMP A    <CURQUX                
+           BNE      SEXIT1                  
+*                                          *  
+           LDA B    <BASEY                 
+           CMP B    <CURQUY                
+           BNE      SEXIT1                  
+*                                          *  
+           LDA A    <BASESX                
+           LDA B    <BASESY                
+           INC A                           
+           SUB A    <CURSCX                
+           CMP A    #$02                   
+           BHI      SEXIT1                 
+           INC B                           
+           SUB B    <CURSCY                
+           CMP B    #$02                   
+           BHI      SEXIT1                 
+           LDA A    #$02                   
+           STA A    <CNDFLG                
+SEXIT1     JMP      COMAND                 
+
+STCRS7     ADD A    <FINCX                 
+           ADD B    <FINCY                 
+           CMP A    #$07                   
+           BHI      GALBND                 
+           CMP B    #$07                   
+           BHI      GALBND                 
+           STA A    <CURQUX                
+           STA B    <CURQUY                
+           LDA A    #$07                   
+           JSR      FIXTIM                 
+           BRA      STCRSA                 
+
+
+* RAMMED A KLINGON ROUTINE
+
+KLGRAM     LDX      #KRMSTR                
+           JSR      PSTRNG                 
+           LDA A    #$01                   
+           STA A    <COUNT                 
+           CLR      >SQFLG                 
+           INC      >HITKLS                
+           DEC      >KLNGCT                
+           DEC      >SECKLN                
+           INC      >PHTFLG                
+           JSR      OBATSO                 
+           LDX      #HEVDAM                
+           JSR      PSTRNG                 
+           LDA B    #$6A                   
+           JSR      MANDAM                 
+           LDX      #STILFT                
+           JSR      PSTRNG                 
+           JSR      OUTKLN                 
+           JMP      STCRSB                 
+
+
+* PRINT GALAXY LIMIT MESSAGE
+
+GALBND     LDX      #GLBNDS                
+           JSR      PSTRNG                 
+           LDA A    <GALCNT                
+           INC A                           
+           CMP A    #$03                   
+           BNE      GALBN2                  
+*                                          *  
+           LDX      #GALDUM                
+           JSR      PSTRNG                 
+           JMP      ENDGAM                 
+
+GALBN2     STA A    <GALCNT                
+           TST      >GLMFLG                
+           BNE      ABC20                   
+*                                          *  
+           JMP      STCRS6                 
+
+ABC20      JMP      STCRSA                 
+
+
+* TORPEDO HAS HIT SOMETHING
+
+PHTOR3     LDX      #PHITST                
+           JSR      PSTRNG                 
+           LDA A    <FLAG                  
+           CMP A    #$02                   
+           BNE      ABC8                    
+*                                          *  
+           DEC      >SECKLN                
+           DEC      >KLNGCT                
+           INC      >HITKLS                
+           LDX      #KLGSTR                
+           JSR      PDATA1                 
+           LDX      #STILFT                
+           JSR      PSTRNG                 
+           JSR      OUTKLN                 
+           BRA      ABC10                  
+
+ABC8       CMP A    #$01                   
+           BNE      ABC11                   
+*                                          *  
+           INC      >HITSTR                
+           LDX      #STARST                
+ABC9       JSR      PDATA1                 
+ABC10      JMP      COMAND                 
+
+ABC11      LDX      #BASEST                HIT BASE!
+           INC      >HITBAS                
+           BRA      ABC9                   
+
+PHTOR4     LDX      #PNOENG                
+           JSR      PSTRNG                 
+           JMP      STCRS6                 
+
+
+* SEE IF GALAXY EDGE REACHED
+
+TSTBND     CLR      >FINCX                 
+           CLR      >FINCY                 
+           TST A                           
+           BPL      TSTBN1                  
+*                                          *  
+           DEC      >FINCX                 
+           BRA      TSTBN2                 
+
+TSTBN1     CMP A    #$07                   
+           BLS      TSTBN2                 
+           INC      >FINCX                 
+TSTBN2     TST B                           
+           BPL      TSTBN3                  
+*                                          *  
+           DEC      >FINCY                 
+           RTS                             
+
+TSTBN3     CMP B    #$07                   
+           BLS      TSTBN4                 
+           INC      >FINCY                 
+TSTBN4     RTS                             
+
+PTEMPT     LDX      #TUBEMT                
+           JSR      PSTRNG                 
+           JMP      COMAND                 
+
+
+* INPUT CHARACTER AND CHECK
+
+INCHCK     CLR A                           
+INCHK0     STA A    <PNTFLG                
+           JSR      INEEE                  
+           CMP A    #$2E                   
+           BEQ      INCHK0                 
+           CMP A    #$39                   
+           BHI      INCHK1                 
+           CMP A    #$2F                   
+           BLS      INCHK1                 
+           SUB A    #$30                   
+           RTS                             
+
+INCHK1     LDX      #ERR                   
+           JSR      PDATA1                 
+           BRA      INCHCK                 
+
+
+* ADD TO GAME TIME
+
+FIXTIM     ADD A    <TIMDEC                
+           CMP A    #$09                   
+           BLS      L08A5                  
+           SUB A    #$0A                   
+           STA A    <TIMDEC                
+           CLR      >TEMP_H                
+           LDA A    #$01                   
+           STA A    <TEMP_L                
+           STX      <TEMP2_L               
+           LDX      #TIME0_H               
+           JSR      BCDADD                 
+           LDX      #TIMUSEH               
+           JSR      BCDADD                 
+           JSR      FIXDAM                 
+           LDX      <TEMP2_L               
+           RTS                             
+
+L08A5      STA A    <TIMDEC                
+           RTS                             
+
+
+* SUBTRACT FROM ENERGY AMOUNT
+
+FIXENG     STX      <TEMP2_L               
+           LDX      #ENERGY_H              
+           CLR      >TEMP_H                
+           STA A    <TEMP_L                
+           JSR      BCDSUB                 
+           LDX      <TEMP2_L               
+           RTS                             
+
+
+* BCD ADDITION
+
+BCDADD     CLC                             
+           BRA      BCDFIX                 
+
+
+* BCD SUBTRACTION
+
+BCDSUB     LDA A    #$99                   
+           SUB A    <TEMP_H                
+           STA A    <TEMP_H                
+           LDA A    #$99                   
+           SUB A    <TEMP_L                
+           STA A    <TEMP_L                
+           SEC                             
+BCDFIX     LDA A    $01,X                  
+           ADC A    <TEMP_L                
+           DAA                             
+           STA A    $01,X                  
+           LDA A    $00,X                  
+           ADC A    <TEMP_H                
+           DAA                             
+           STA A    $00,X                  
+           RTS                             
+
+
+* LONG RANGE SCAN
+
+LRSCAN     TST      >DAMLRS                
+           BEQ      LRSNDM                 
+           JMP      RPTDAM                 
+
+LRSNDM     CLR      >TOPFLG                
+           CLR      >BOTFLG                
+           CLR      >LSDFLG                
+           CLR      >RSDFLG                
+           LDX      #LRSCST                
+           JSR      PSTRNG                 
+           JSR      OUTQUD                 
+           JSR      PCRLF                  
+           JSR      PCRLF                  
+           LDA A    <CURQUX                
+           BNE      LRSCNT                  
+*                                          *  
+           INC      >LSDFLG                
+LRSCNT     CMP A    #$07                   
+           BNE      LRSCN2                  
+*                                          *  
+           INC      >RSDFLG                
+LRSCN2     LDA A    <CURQUY                
+           BNE      LRSCN3                  
+*                                          *  
+           INC      >TOPFLG                
+LRSCN3     CMP A    #$07                   
+           BNE      LRSCN4                  
+*                                          *  
+           INC      >BOTFLG                
+LRSCN4     LDX      <QUDPTR                
+           LDA A    #$F7                   
+           JSR      FIXXRG                 
+           TST      >TOPFLG                
+           BEQ      LRSCN7                 
+           BSR      OUTTH0                 
+           BRA      LRSCN8                 
+
+LRSCN7     BSR      OUTLIN                 
+LRSCN8     LDA A    #$05                   
+           JSR      FIXXRG                 
+           BSR      OUTLIN                 
+           LDA A    #$05                   
+           JSR      FIXXRG                 
+           TST      >BOTFLG                
+           BEQ      LRSCN9                  
+*                                          *  
+           BSR      OUTTH0                 
+           BRA      LRSC10                 
+
+LRSCN9     BSR      OUTLIN                 
+LRSC10     JMP      COMAND                 
+
+
+* OUTPUT 1 LINE OF LONG RANGE SCAN
+
+OUTLIN     LDA A    $00,X                  
+           TST      >LSDFLG                
+           BEQ      OUTLN1                  
+*                                          *  
+           CLR A                           
+OUTLN1     BSR      OUTQIN                 
+           LDA A    $00,X                  
+           BSR      OUTQIN                 
+           LDA A    $00,X                  
+           TST      >RSDFLG                
+           BEQ      OUTLN3                  
+*                                          *  
+           CLR A                           
+OUTLN3     BSR      OUTQIN                 
+           JMP      PCRLF                  
+
+
+* OUTPUT QUADRANT INFORMATION
+
+OUTQIN     TAB                             
+           AND A    #$80                   
+           CLC                             
+           ROL A                           
+           ROL A                           
+           JSR      OUTHR                  
+           TBA                             
+           AND A    #$40                   
+           LSR A                           
+           LSR A                           
+           JSR      OUTHL                  
+           TBA                             
+           AND A    #$38                   STARS
+           ASL A                           
+           JSR      OUTHL                  
+           TBA                             
+           AND A    #$07                   KLINGONS
+           JSR      OUTHR                  
+           INX                             
+           JMP      OUTS                   
+
+
+* OUTPUT A LINE OF ZEROS
+
+OUTTH0     LDA A    #$03                   
+           STA A    <COUNT                 
+OUTTH1     CLR A                           
+           BSR      OUTQIN                 
+           DEC      >COUNT                 
+           BNE      OUTTH1                  
+*                                          *  
+           JMP      PCRLF                  
+
+
+* FIRE PHASORS
+
+PHASOR     TST      >DAMPHS                
+           BEQ      PHSNDM                 
+           JMP      RPTDAM                 
+
+PHSNDM     TST      >SHIELD                
+           BEQ      PHASR1                 
+           LDX      #MLSHLD                
+           BRA      TOOMC1                 
+
+PHASR1     LDX      #ENAVLB                REPORT ENERGY
+           JSR      PSTRNG                 
+           LDX      <ENERGY_H              
+           STX      <TEMP_H                
+           JSR      OUTBCD                 
+           LDX      #FIRENG                
+           JSR      PSTRNG                 
+           JSR      INBCD                  
+           LDA A    <PHSENG_H              
+           CMP A    <ENERGY_H              
+           BHI      TOOMCH                  
+*                                          *  
+           BNE      PHASR2                  
+*                                          *  
+           LDA A    <PHSENG_L              
+           CMP A    <ENERGY_L              
+           BLS      PHASR2                 
+TOOMCH     LDX      #TOMUCH                
+TOOMC1     JSR      PSTRNG                 
+           JMP      COMAND                 
+
+PHASR2     JSR      RANDOM                 
+           CMP A    #$F4                   
+           BLS      PHASR3                  
+*                                          *  
+           LDX      #PHAMIS                
+           JSR      PSTRNG                 
+           BRA      PHASR6                 
+
+PHASR3     LDA A    <PHSENG_H              
+           CMP A    <KLNENG_H              
+           BHI      PHASR4                  
+*                                          *  
+           BNE      PHASR5                  
+*                                          *  
+           LDA A    <PHSENG_L              
+           CMP A    <KLNENG_L              
+           BLS      PHASR5                 
+PHASR4     CLR      >KLNENG_H              
+           CLR      >KLNENG_L              
+           LDX      #ALKILL                
+           JSR      PSTRNG                 
+           LDX      #STILFT                
+           JSR      PSTRNG                 
+           LDA B    <SECKLN                
+           STA B    <HITKLS                
+           LDA A    <KLNGCT                
+           SBA                             
+           STA A    <KLNGCT                
+           JSR      OUTKLN                 
+           CLR      >SECKLN                
+           LDX      #SECMAP                
+           LDA A    #$10                   
+           STA A    <COUNT                 
+KILAL1     LDA B    #$04                   
+           LDA A    $00,X                  
+KILAL2     ROR A                           
+           BCS      KILAL4                  
+*                                          *  
+           ROR A                           
+           BCC      KILAL3                 
+           CLC                             
+KILAL3     DEC B                           
+           BNE      KILAL2                  
+*                                          *  
+           ROR A                           
+           STA A    $00,X                  
+           INX                             
+           DEC      >COUNT                 
+           BNE      KILAL1                 
+           BRA      PHASR6                 
+
+KILAL4     ROR A                           
+           BRA      KILAL3                 
+
+PHASR5     LDX      <PHSENG_H              
+           STX      <TEMP_H                
+           LDX      #KLNENG_H              
+           JSR      BCDSUB                 
+           LDX      #KHTADM                
+           JSR      PSTRNG                 
+PHASR6     LDX      <PHSENG_H              
+           STX      <TEMP_H                
+           LDX      #ENERGY_H              
+           JSR      BCDSUB                 
+           JMP      COMAND                 
+
+
+* INPUT A BCD NUMBER
+
+INBCD      CLR      >PHSENG_H              
+           CLR      >PHSENG_L              
+INBCD1     JSR      INEEE                  
+           CMP A    #$2F                   
+           BLS      EXIT                    
+*                                          *  
+           BSR      CHECK                  
+           TST      >FLAGC                 
+           BNE      INEROR                  
+*                                          *  
+           LDA B    #$04                   
+INBCD2     ASL      >PHSENG_L              
+           ROL      >PHSENG_H              
+           DEC B                           
+           BNE      INBCD2                  
+*                                          *  
+           ADD A    <PHSENG_L              
+           STA A    <PHSENG_L              
+           BRA      INBCD1                 
+
+INEROR     LDX      #ERR                   
+           JSR      PDATA1                 
+           BRA      INBCD1                 
+
+EXIT       RTS                             
+
+
+* CHECK FOR DECIMAL NUMBER
+
+CHECK      CLR      >FLAGC                 
+           CMP A    #$39                   
+           BHI      SETFLG                 
+           AND A    #$0F                   
+           RTS                             
+
+SETFLG     INC      >FLAGC                 
+           RTS                             
+
+
+* SELF DESTRUCT ROUTINE
+
+SELFDE     LDX      #PASWRD                
+           JSR      PSTRNG                 
+           LDX      #L006D                 
+           LDA B    #$03                   
+SELFD1     JSR      INEEE                  
+           CMP A    $00,X                  
+           BNE      SELFD2                  
+*                                          *  
+           INX                             
+           DEC B                           
+           BNE      SELFD1                  
+*                                          *  
+SELFDA     LDX      #DISINT                
+           JSR      PSTRNG                 
+           JMP      ENDGAM                 
+
+SELFD2     LDX      #ABORT2                
+           JSR      PSTRNG                 
+           JMP      COMAND                 
+
+
+* TELEPORT ROUTINE
+
+TELEPT     LDA A    #$12                   
+           CMP A    <TIMUSEL               
+           BHI      TELEP2                  
+*                                          *  
+           TST      >TELFLG                
+           BNE      TELEP4                  
+*                                          *  
+           JSR      RANDOM                 
+           CMP A    #$B0                   
+           BLS      TELEP1                  
+*                                          *  
+           INC      >TELFLG                
+TELEP1     JSR      RANDOM                 
+           CMP A    #$B0                   
+           BHI      TELEP5                  
+*                                          *  
+           LDA A    <BASEX                 
+           STA A    <CURQUX                
+           LDA A    <BASEY                 
+           STA A    <CURQUY                
+TELEPA     JMP      STCRSA                 
+
+TELEP2     LDX      #CANTUS                
+TELEP3     JSR      PSTRNG                 
+           JMP      COMAND                 
+
+TELEP4     LDX      #DMGDST                
+           BRA      TELEP3                 
+
+TELEP5     JSR      RANDOM                 
+           AND A    #$07                   
+           STA A    <CURQUX                
+           JSR      RANDOM                 
+           AND A    #$07                   
+           STA A    <CURQUY                
+           LDX      #SOMWHR                
+           JSR      PSTRNG                 
+           BRA      TELEPA                 
+
+
+* KLINGON ATTACK ROUTINE
+
+ATTACK     TST      >SECKLN                ANY Ks?
+           BNE      ATTAC1                 
+           RTS                             
+
+ATTAC1     JSR      RANDOM                 MAY NOT ATTACK
+           CMP A    #$B0                   
+           BHI      ATTAC2                 
+           LDX      #ATKENG                
+           LDA B    <SECKLN                
+           ASL B                           
+           JSR      CSCEXT                 
+           LDX      <ATKENG                
+           STX      <TEMP_H                
+           TST      >SHIELD                
+           BNE      ATTAC3                 
+           LDX      #ENERGY_H              
+           JSR      BCDSUB                 
+           JSR      PCRLF                  
+           JSR      PCRLF                  
+           LDX      <ATKENG                
+           STX      <TEMP_H                
+           JSR      OUTBCD                 
+           LDX      #KATKDN                
+           JSR      PDATA1                 
+           LDA B    #$FA                   
+           JSR      MANDAM                 
+ATTAC2     RTS                             
+
+ATTAC3     LDX      #SHENGY_H              
+           JSR      BCDSUB                 
+           LDX      #KATKUP                
+           JMP      PSTRNG                 
+
+
+* END OF GAME CLEANUP ROUTINE
+
+NRGOUT     LDX      #NMENGS                
+NRGOU1     JSR      PSTRNG                 
+           BRA      ENDGAM                 
+
+NOMTIM     LDX      #NMTMST                
+           BRA      NRGOU1                 
+
+NOMKLN     LDX      #NMKLST                
+           JSR      PSTRNG                 
+           BRA      ENDGM2                 
+
+ENDGAM     LDX      #FAILST                
+           JSR      PSTRNG                 
+           BRA      ENDGM3                 
+
+ENDGM2     LDX      #SUCCST                
+           JSR      PSTRNG                 
+ENDGM3     LDX      #PLAYAG                
+           JSR      PSTRNG                 
+           JSR      INEEE                  
+           CMP A    #$4E                   
+           BEQ      ENDGM4                 
+           JMP      CONTRL                 
+
+ENDGM4     JMP      _SWTBUG                
+
+
+* CLEAR OUT CURRENT QUADRANT
+
+CLRCQU     LDX      <QUDPTR                
+           LDA A    $00,X                  
+           SUB A    <HITKLS                CLEAR Ks
+           LDA B    <HITSTR                CLEAR Ss
+           ASL B                           
+           ASL B                           
+           ASL B                           
+           SBA                             
+           TST      >HITBAS                CLEAR B?
+           BEQ      CLRCQ2                 
+           AND A    #$BF                   
+           LDA B    #$0A                   
+           STA B    <BASEX                 
+           STA B    <BASEY                 
+           CLR      >CNDFLG                
+CLRCQ2     STA A    $00,X                  
+           CLR A                           
+           STA A    <HITKLS                
+           STA A    <HITSTR                
+           STA A    <HITBAS                
+           RTS                             
+
+
+* FIX DAMAGE ROUTINE
+
+FIXDAM     LDX      #DAMENG                
+           LDA B    #$06                   
+FIXDM1     TST      $00,X                  
+           BEQ      FIXDM2                  
+*                                          *  
+           DEC      $00,X                  
+FIXDM2     INX                             
+           DEC B                           
+           BNE      FIXDM1                 
+           RTS                             
+
+
+* SUPERNOVA GENERATOR
+
+SUPNOV     JSR      RANDOM                 
+           AND A    #$07                   
+           TAB                             
+           JSR      RANDOM                 
+           AND A    #$07                   
+           STA B    <TSAVE1                
+           LDX      #QUDMAP                
+           INC      >STPSFL                
+           JSR      STPSEX                 
+           LDA B    $00,X                  
+           AND B    #$07                   
+           LDA A    <KLNGCT                
+           SBA                             
+           STA A    <KLNGCT                
+           LDA A    #$80                   
+           STA A    $00,X                  
+           LDX      #SUPSTR                
+           JSR      PSTRNG                 
+           LDA A    <ASAVE                 
+           JSR      FIXOUT                 
+           JSR      OUTDSH                 
+           LDA A    <TSAVE1                
+           JSR      FIXOUT                 
+           JMP      COMAND                 
+
+
+* GENERATE MAIN DAMAGE
+
+MANDAM     LDX      #DAMENG                
+MANDM1     JSR      RANDOM                 
+           CBA                             
+           BLS      MANDM2                  
+*                                          *  
+           JSR      RANDOM                 
+           AND A    #$03                   
+           SEC                             
+           ADC A    $00,X                  
+           STA A    $00,X                  
+MANDM2     INX                             
+           CPX      #DAMENG_9              
+           BNE      MANDM1                  
+*                                          *  
+           TST      >DAMSHL                
+           BEQ      MANDM3                  
+*                                          *  
+           CLR      >SHIELD                
+MANDM3     RTS                             
+
+
+* REPORT DAMAGE HAS OCCURED
+
+RPTDAM     LDX      #DMGDST                
+           JSR      PSTRNG                 
+RPTDM8     JMP      COMAND                 
+
+
+* GENERATE A DAMAGE REPORT
+
+DAMRPT     LDX      #DMRPST                
+           JSR      PSTRNG                 
+           LDX      #DEVSTR                
+           STX      <TEMP2_H               
+           LDX      #DAMENG                
+DMRPT2     TST      $00,X                  
+           BEQ      DMRPT3                  
+*                                          *  
+           STX      <TEMP3                 
+           LDX      <TEMP2_H               
+           JSR      PSTRNG                 
+           INX                             
+           STX      <TEMP2_H               
+           LDX      <TEMP3                 
+           LDA B    #$03                   
+OUTS4      JSR      OUTS                   output 3 spaces
+           DEC B                           
+           BNE      OUTS4                   
+*                                          *  
+           LDA A    $00,X                  
+           JSR      OUTK0                   
+*                                          *  
+DMRPT4     INX                             
+           CPX      #DAMENG_9              
+           BNE      DMRPT2                 
+           BRA      RPTDM8                 
+
+DMRPT3     STX      <TEMP3                 
+           LDX      <TEMP2_H               
+           INX                             
+           INX                             
+           INX                             
+           INX                             
+           STX      <TEMP2_H               
+           LDX      <TEMP3                 
+           BRA      DMRPT4                 
+
+TITLE      FCB      $10
+           FCC      'SPACE VOYAGE V3.2'
+           FCB      $04
+SHTLNG     FCB      $0A
+           FCC      'S OR L? '
+           FCB      $04
+UPSCAS     FCC      ' UP'
+           FCB      $04
+BASINF     FCB      $0A
+           FCC      'BASE IN Q'
+           FCB      $04
+DOCKED     FCC      'DOCKED'
+           FCB      $04
+DNSCAS     FCC      ' DN'
+           FCB      $04
+TUBEMT     FCC      'TUBES EMPTY'
+           FCB      $04
+INTRO1     FCB      $10
+           FCB      $16
+           FCC      'DATE: '
+           FCB      $04
+INTRO2     FCC      'KLINGONS: '
+           FCB      $04
+INTRO3     FCC      'YEARS: '
+           FCB      $04
+INTRO4     FCC      'QUADRANT: '
+           FCB      $04
+INTRO6     FCC      'SECTOR: '
+           FCB      $04
+COMST      FCB      $0A
+           FCC      'COMMAND: '
+           FCB      $04
+DWNST      FCC      'SHIELDS DOWN!'
+           FCB      $04
+UPSTR      FCC      'SHIELDS UP'
+           FCB      $04
+CRSSTR     FCC      'COURSE: '
+           FCB      $04
+WRPSTR     FCC      'WARP FACTOR: '
+           FCB      $04
+BLOKST     FCC      'BLOCKED AT S'
+           FCB      $04
+KRMSTR     FCC      'RAMMED KLINGON AT S'
+           FCB      $04
+GLBNDS     FCC      'GALAXY LIMIT'
+           FCB      $04
+PHITST     FCC      'TORPEDO HIT '
+           FCB      $04
+PNOENG     FCC      'OUT OF ENERGY'
+           FCB      $04
+SDATE      FCC      ' '
+           FCB      $00
+           FCC      'S.DATE: '
+           FCB      $04
+CNDTNS     FCC      ' '
+           FCB      $00
+           FCC      'CNDTN: '
+           FCB      $04
+YELLOW     FCC      'YELLOW'
+           FCB      $04
+RED        FCC      'RED'
+           FCB      $04
+GREEN      FCC      'GREEN'
+           FCB      $04
+QUADP      FCC      ' '
+           FCB      $00
+           FCC      'QUDRNT: '
+           FCB      $04
+SECP       FCC      ' '
+           FCB      $00
+           FCC      'SECTOR: '
+           FCB      $04
+ENGSTR     FCC      ' '
+           FCB      $00
+           FCC      'ENERGY: '
+           FCB      $04
+KLSTR      FCC      ' '
+           FCB      $00
+           FCC      'KLINGONS: '
+           FCB      $04
+SHSTR      FCC      ' '
+           FCB      $00
+           FCC      'SHLDS: '
+           FCB      $04
+TRPSTR     FCC      ' '
+           FCB      $00
+           FCC      'TORPEDO: '
+           FCB      $04
+CRLF       FCB      $0D
+           FCB      $0A
+           FCB      $16
+           FCB      $00
+           FCB      $00
+           FCB      $00
+           FCB      $04
+LRSCST     FCB      $10
+           FCC      'SCAN FOR Q'
+           FCB      $04
+MLSHLD     FCC      'MUST LOWER SHIELDS'
+           FCB      $04
+ENAVLB     FCC      'ENERGY AVAILABLE: '
+           FCB      $04
+FIRENG     FCC      'ENERGY = '
+           FCB      $04
+TOMUCH     FCC      'ENERGY TOO LOW'
+           FCB      $04
+PHAMIS     FCC      'MISFIRE!'
+           FCB      $04
+ALKILL     FCC      'ALL LOCAL KLINGONS DESTROYED!'TROYED!'
+           FCB      $04
+KHTADM     FCC      'ENEMY DAMAGED'
+           FCB      $04
+ERR        FCC      ' ? '
+           FCB      $04
+STARST     FCC      'STAR'
+           FCB      $04
+BASEST     FCC      'BASE'
+           FCB      $04
+KLGSTR     FCC      'KLINGON'
+           FCB      $04
+PASWRD     FCB      $0A
+           FCC      'PASSWORD.. '
+           FCB      $04
+STILFT     FCC      'KLINGONS LEFT = '
+           FCB      $04
+KATKDN     FCC      ' UNITS HIT ENTERPRISE'
+           FCB      $04
+KATKUP     FCB      $0A
+           FCC      'KLINGONS ATTACK: SHIELDS HOLDING'
+           FCB      $04
+DISINT     FCC      'ENTERPRISE DISINTEGRATES'ES'
+           FCB      $04
+ABORT2     FCC      'SEQUENCE ABORT: PASSWORD'RD'
+           FCB      $04
+CANTUS     FCC      'TOO EARLY!'
+           FCB      $04
+SOMWHR     FCC      'MALFUNCTION!'
+           FCB      $04
+SPSTRM     FCB      $0A
+           FCB      $07
+           FCC      'SPACE STORM: SHIELDS DAMAGED!'
+           FCB      $04
+GALDUM     FCB      $0A
+           FCB      $07
+           FCC      'SHIP IS FRIED FOR 3RD ATTEMPT!'
+           FCB      $04
+NMENGS     FCB      $07
+           FCC      'ENERGY = 0'
+           FCB      $04
+NMTMST     FCB      $07
+           FCC      'TIME UP!'
+           FCB      $04
+NMKLST     FCB      $0A
+           FCB      $07
+           FCC      'CONGRATULATIONS!'
+           FCB      $0D
+           FCB      $0A
+           FCB      $00
+           FCB      $00
+           FCB      $00
+           FCB      $00
+           FCC      'ALL KLINGONS DESTROYED'
+           FCB      $04
+FAILST     FCC      'MISSION A FAILURE'
+           FCB      $04
+SUCCST     FCC      'THE FEDERATION IS SAVED!'D!'
+           FCB      $04
+SUPDES     FCC      'SUPERNOVA!'
+           FCB      $04
+SUPSTR     FCB      $0A
+           FCB      $07
+           FCC      'SUPERNOVA IN Q'
+           FCB      $04
+HEVDAM     FCC      'BADLY '
+DMGDST     FCC      'DAMAGED'
+           FCB      $04
+DMRPST     FCB      $10
+           FCC      'DEV  STAT'
+           FCB      $04
+DEVSTR     FCC      'ENG'
+           FCB      $04
+           FCC      'SRS'
+           FCB      $04
+           FCC      'LRS'
+           FCB      $04
+           FCC      'PHS'
+           FCB      $04
+           FCC      'TRP'
+           FCB      $04
+           FCC      'SHL'
+           FCB      $04
+PLAYAG     FCB      $0A
+           FCC      'PLAY AGAIN? '
+           FCB      $04
+           FCB      $93
+
+
+           ORG      $A048
+
+LA048      FCB      $01
+           FCB      $00
+LA04A      FCB      $96
+           FCC      '!L9
+
+*
+* External References
+*
+
+STPSFL     EQU      $0020
+BASEX      EQU      $0021
+BASEY      EQU      $0022
+BASESX     EQU      $0023
+BASESY     EQU      $0024
+GLMFLG     EQU      $0025
+SECKLN     EQU      $0026
+FLAGC      EQU      $0027
+TIMDEC     EQU      $0028
+STCFLG     EQU      $0029
+SQFLG      EQU      $002A
+PNTFLG     EQU      $002B
+COURSE     EQU      $002C
+WARP       EQU      $002D
+FINCX      EQU      $002E
+FINCY      EQU      $002F
+COUNT      EQU      $0030
+TEMP_H     EQU      $0031
+TEMP_L     EQU      $0032
+TEMP2_H    EQU      $0033
+TEMP2_L    EQU      $0035
+TIME0_H    EQU      $0037
+TIME0_L    EQU      $0038
+GAMTIM     EQU      $0039
+TIMUSEH    EQU      $003A
+TIMUSEL    EQU      $003B
+SHENGY_H   EQU      $003C
+SHENGY_L   EQU      $003D
+KLNENG_H   EQU      $003E
+KLNENG_L   EQU      $003F
+PHSENG_H   EQU      $0040
+PHSENG_L   EQU      $0041
+TOPFLG     EQU      $0042
+BOTFLG     EQU      $0043
+LSDFLG     EQU      $0044
+RSDFLG     EQU      $0045
+PHOTON     EQU      $0046
+CURQUX     EQU      $0047
+CURQUY     EQU      $0048
+CURSCX     EQU      $0049
+CURSCY     EQU      $004A
+TRIALX     EQU      $004B
+TRIALY     EQU      $004C
+FLAG       EQU      $004D
+CNDFLG     EQU      $004E
+SCANX      EQU      $004F
+SCANY      EQU      $0050
+COUNT1     EQU      $0051
+SECINF     EQU      $0052
+MASK       EQU      $0053
+KLNGCT     EQU      $0054
+LENGTH     EQU      $0055
+ASAVE      EQU      $0056
+SHIELD     EQU      $0057
+ENERGY_H   EQU      $0058
+ENERGY_L   EQU      $0059
+TSAVE1     EQU      $005A
+HITKLS     EQU      $005B
+HITSTR     EQU      $005C
+HITBAS     EQU      $005D
+TEMP3      EQU      $005E
+GALCNT     EQU      $0060
+DAMENG     EQU      $0061
+DAMSRS     EQU      $0062
+DAMLRS     EQU      $0063
+DAMPHS     EQU      $0064
+DAMPHT     EQU      $0065
+DAMSHL     EQU      $0066
+DAMENG_9   EQU      $0067
+TELFLG     EQU      $0068
+ATKENG     EQU      $0069
+QUDPTR     EQU      $006B
+L006D      EQU      $006D
+PHTFLG     EQU      $0070
+QUDMAP     EQU      $0071
+SECMAP     EQU      $00B1
+LA042      EQU      $A042
+_OUTHL     EQU      $E067
+_OUTHR     EQU      $E06B
+_PDATA     EQU      $E07E
+_OUTS      EQU      $E0CC
+_SWTBUG    EQU      $E0E3
+_INEEE     EQU      $E1AC
+_OUTEEE    EQU      $E1D1
+
+                         END      CONTRL

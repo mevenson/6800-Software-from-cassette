@@ -1,0 +1,327 @@
+              *
+              * PROGRAM HANGMAN.stx DISSASSEMBLED BY DA68Sharp
+              *
+              * using control table file HANGMAN.ctl
+              *
+'
+
+                         ORG      $0100
+
+              *
+              * SUBROUTINE: START     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+0100  20 12   START      BRA      BEGIN                  
+
+              *
+              * SUBROUTINE: L0102     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+0102  7E E1D1 L0102      JMP      LE1D1                  
+
+              *
+              * SUBROUTINE: L0105     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+0105  7E E1AC L0105      JMP      LE1AC                  
+
+              *
+              * SUBROUTINE: OUTSTR    
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+0108  7E E07E OUTSTR     JMP      PDATA                  send to the console
+
+              *
+              * SUBROUTINE: L010B     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+010B  7E E0CC L010B      JMP      LE0CC                  
+
+010E  7E E0E3 L010E      JMP      LE0E3                  
+
+              *
+              * SUBROUTINE: L0111     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+0111  7E A04A L0111      JMP      LA04A                  
+
+0114  8E A042 BEGIN      LDS      #STACK                 set up the stack
+0117  BD 0219            JSR      PCRLF                  send signon message to the console
+              *                                           
+011A  CE 0226            LDX      #SIGNON                send the name of the program to the console
+011D  BD 0108            JSR      OUTSTR                 
+0120  BD 0219 L0120      JSR      PCRLF                  
+0123  CE 022E            LDX      #THINKING              I am thinking of a word
+0126  BD 0108            JSR      OUTSTR                 
+0129  BD 0111 L0129      JSR      L0111                  
+012C  84 3F              AND A    #$3F                   
+012E  27 F9              BEQ      L0129                  
+0130  C6 20              LDA B    #$20                   
+0132  11                 CBA                             
+0133  22 F4              BHI      L0129                  
+0135  CE 0021            LDX      #L0021                 
+0138  DF 2D              STX      <L002D                 
+013A  CE 028D            LDX      #L028D                 
+013D  08      L013D      INX                             
+013E  E6 00              LDA B    $00,X                  
+0140  C1 04              CMP B    #$04                   
+0142  26 F9              BNE      L013D                  
+0144  4A                 DEC A                           
+0145  26 F6              BNE      L013D                  
+0147  5F                 CLR B                           
+0148  D7 20              STA B    <L0020                 
+014A  08      L014A      INX                             
+014B  DF 2B              STX      <L002B                 
+014D  A6 00              LDA A    $00,X                  
+014F  27 D8              BEQ      L0129                  
+0151  DE 2D              LDX      <L002D                 
+0153  A7 00              STA A    $00,X                  
+0155  81 04              CMP A    #$04                   
+0157  27 0A              BEQ      L0163                  
+0159  5C                 INC B                           
+015A  08                 INX                             
+015B  DF 2D              STX      <L002D                 
+015D  DE 2B              LDX      <L002B                 
+015F  6F 00              CLR      $00,X                  
+0161  20 E7              BRA      L014A                  
+
+0163  CB 30   L0163      ADD B    #$30                   
+0165  17                 TBA                             
+0166  BD 0102            JSR      L0102                  
+0169  CE 0255            LDX      #L0255                 
+016C  BD 0108            JSR      OUTSTR                 
+016F  BD 0219 L016F      JSR      PCRLF                  
+0172  CE 025E            LDX      #L025E                 
+0175  BD 0108            JSR      OUTSTR                 
+0178  BD 0105            JSR      L0105                  
+017B  81 5A              CMP A    #$5A                   
+017D  22 F0              BHI      L016F                  
+017F  81 41              CMP A    #$41                   
+0181  2B EC              BMI      L016F                  
+0183  CE 0021            LDX      #L0021                 
+0186  E6 00   L0186      LDA B    $00,X                  
+0188  C1 04              CMP B    #$04                   
+018A  27 0C              BEQ      L0198                  
+018C  11                 CBA                             
+018D  27 03              BEQ      L0192                  
+018F  08                 INX                             
+0190  20 F4              BRA      L0186                  
+
+0192  8A 80   L0192      ORA A    #$80                   
+0194  A7 00              STA A    $00,X                  
+0196  20 03              BRA      L019B                  
+
+0198  7C 0020 L0198      INC      >L0020                 
+019B  BD 0219 L019B      JSR      PCRLF                  
+019E  CE 0021            LDX      #L0021                 
+01A1  A6 00   L01A1      LDA A    $00,X                  
+01A3  2B 06              BMI      L01AB                  
+01A5  81 04              CMP A    #$04                   
+01A7  27 0B              BEQ      L01B4                  
+01A9  86 2D              LDA A    #$2D                   
+01AB  BD 0102 L01AB      JSR      L0102                  
+01AE  BD 010B            JSR      L010B                  
+01B1  08                 INX                             
+01B2  20 ED              BRA      L01A1                  
+
+01B4  BD 010B L01B4      JSR      L010B                  
+01B7  BD 010B            JSR      L010B                  
+01BA  CE 0226            LDX      #SIGNON                
+01BD  D6 20              LDA B    <L0020                 
+01BF  27 09              BEQ      L01CA                  
+01C1  A6 00   L01C1      LDA A    $00,X                  
+01C3  BD 0102            JSR      L0102                  
+01C6  08                 INX                             
+01C7  5A                 DEC B                           
+01C8  26 F7              BNE      L01C1                  
+01CA  96 20   L01CA      LDA A    <L0020                 
+01CC  81 07              CMP A    #$07                   
+01CE  27 1B              BEQ      L01EB                  
+01D0  CE 0021            LDX      #L0021                 
+01D3  A6 00   L01D3      LDA A    $00,X                  
+01D5  81 04              CMP A    #$04                   
+01D7  27 08              BEQ      L01E1                  
+01D9  2A 03              BPL      L01DE                  
+01DB  08                 INX                             
+01DC  20 F5              BRA      L01D3                  
+
+01DE  7E 016F L01DE      JMP      L016F                  
+
+01E1  8D 36   L01E1      BSR      PCRLF                  
+01E3  CE 026B            LDX      #L026B                 
+01E6  BD 0108            JSR      OUTSTR                 
+01E9  20 17              BRA      L0202                  
+
+01EB  8D 2C   L01EB      BSR      PCRLF                  
+01ED  CE 0274            LDX      #L0274                 
+01F0  BD 0108            JSR      OUTSTR                 
+01F3  CE 0021            LDX      #L0021                 
+01F6  A6 00   L01F6      LDA A    $00,X                  
+01F8  81 04              CMP A    #$04                   
+01FA  27 06              BEQ      L0202                  
+01FC  BD 0102            JSR      L0102                  
+01FF  08                 INX                             
+0200  20 F4              BRA      L01F6                  
+
+0202  8D 15   L0202      BSR      PCRLF                  
+0204  8D 13              BSR      PCRLF                  
+0206  CE 0282            LDX      #L0282                 
+0209  BD 0108            JSR      OUTSTR                 
+020C  BD 0105            JSR      L0105                  
+020F  81 4E              CMP A    #$4E                   
+0211  27 03              BEQ      L0216                  
+0213  7E 0120            JMP      L0120                  
+
+0216  7E 010E L0216      JMP      L010E                  
+
+              *
+              * SUBROUTINE: PCRLF     
+              *
+              *   ENTRY:  
+              *
+              *   EXIT:   
+              *
+0219  CE 021F PCRLF      LDX      #CRLF                  name of the program
+021C  7E 0108            JMP      OUTSTR                 send to the screen
+
+021F          CRLF       FCB      $0D
+0220                     FCB      $0A
+0221                     FCB      $00
+0222                     FCB      $00
+0223                     FCB      $00
+0224                     FCB      $00
+0225                     FCB      $04
+0226          SIGNON     FCC      'HANGMAN'
+022D                     FCB      $04
+022E          THINKING   FCC      'I AM THINKING OF A WORD' D'
+0245                     FCB      $0D
+0246                     FCB      $0A
+0247                     FCB      $00
+0248                     FCB      $00
+0249                     FCB      $00
+024A                     FCB      $00
+024B                     FCC      'THAT HAS '
+0254                     FCB      $04
+0255          L0255      FCC      ' LETTERS'
+025D                     FCB      $04
+025E          L025E      FCC      'YOUR GUESS? '
+026A                     FCB      $04
+026B          L026B      FCC      'YOU WIN!'
+0273                     FCB      $04
+0274          L0274      FCC      'THE WORD WAS '
+0281                     FCB      $04
+0282          L0282      FCC      'PLAY AGAIN?'
+028D          L028D      FCC      ' '
+028E                     FCB      $04
+028F                     FCC      'TABLE'
+0294                     FCB      $04
+0295                     FCC      'OCTOPUS'
+029C                     FCB      $04
+029D                     FCC      'HORN'
+02A1                     FCB      $04
+02A2                     FCC      'WOODEN'
+02A8                     FCB      $04
+02A9                     FCC      'APPEAL'
+02AF                     FCB      $04
+02B0                     FCC      'MISUSED'
+02B7                     FCB      $04
+02B8                     FCC      'APPLIQUE'
+02C0                     FCB      $04
+02C1                     FCC      'NOVICE'
+02C7                     FCB      $04
+02C8                     FCC      'ZEBRA'
+02CD                     FCB      $04
+02CE                     FCC      'ANIMAL'
+02D4                     FCB      $04
+02D5                     FCC      'COMPUTER'
+02DD                     FCB      $04
+02DE                     FCC      'HOOK'
+02E2                     FCB      $04
+02E3                     FCC      'BICYCLE'
+02EA                     FCB      $04
+02EB                     FCC      'TANDEM'
+02F1                     FCB      $04
+02F2                     FCC      'ABLE'
+02F6                     FCB      $04
+02F7                     FCC      'BUILD'
+02FC                     FCB      $04
+02FD                     FCC      'DONKEY'
+0303                     FCB      $04
+0304                     FCC      'ADVOCATE'
+030C                     FCB      $04
+030D                     FCC      'CHURCH'
+0313                     FCB      $04
+0314                     FCC      'TRUCK'
+0319                     FCB      $04
+031A                     FCC      'TRAVEL'
+0320                     FCB      $04
+0321                     FCC      'ROTATE'
+0327                     FCB      $04
+0328                     FCC      'KNIFE'
+032D                     FCB      $04
+032E                     FCC      'BOAT'
+0332                     FCB      $04
+0333                     FCC      'SHOVEL'
+0339                     FCB      $04
+033A                     FCC      'SUSTAIN'
+0341                     FCB      $04
+0342                     FCC      'COOLER'
+0348                     FCB      $04
+0349                     FCC      'DEAL'
+034D                     FCB      $04
+034E                     FCC      'FATHER'
+0354                     FCB      $04
+0355                     FCC      'FOX'
+0358                     FCB      $04
+0359                     FCC      'GHOST'
+035E                     FCB      $04
+035F                     FCC      'HEIGHT'
+0365                     FCB      $04
+0366                     FCC      'Tk'
+0368                     FCB      $09
+0369                     FCC      'KuBUJ][L'
+
+0370          
+
+                         ORG      $A048
+
+A048     0100 LA048      FDB      START                  
+A04A  96 21   LA04A      LDA A    <L0021                 
+A04C  4C                 INC A                           
+A04D  39                 RTS                             
+
+
+              *
+              * External References
+              *
+
+0020          L0020      EQU      $0020
+0021          L0021      EQU      $0021
+002B          L002B      EQU      $002B
+002D          L002D      EQU      $002D
+A042          STACK      EQU      $A042
+E07E          PDATA      EQU      $E07E
+E0CC          LE0CC      EQU      $E0CC
+E0E3          LE0E3      EQU      $E0E3
+E1AC          LE1AC      EQU      $E1AC
+E1D1          LE1D1      EQU      $E1D1
+
+                         END      START
